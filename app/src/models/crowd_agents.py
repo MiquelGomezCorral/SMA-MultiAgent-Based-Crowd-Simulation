@@ -44,7 +44,11 @@ class CrowdAgent(CellAgent):
         
         # Remove agent if reached exit (i.e., neighboring an exit cell)
         if any(
-            any(agent.agent_type == CrowdAgentEnum.EXIT for agent in neighbor.agents) 
+            any( # Check if any agent in neighbor cell is an exit matching this agent's exit_idx
+                agent.agent_type == CrowdAgentEnum.EXIT 
+                and (agent.exit_idx == self.exit_idx or self.exit_idx is None) 
+                for agent in neighbor.agents
+            ) 
             for neighbor in self.cell.neighborhood
         ):
             self.cell = None
