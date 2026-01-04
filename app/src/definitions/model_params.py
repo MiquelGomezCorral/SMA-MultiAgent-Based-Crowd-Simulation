@@ -6,8 +6,8 @@ basic_model_params = {
         "type": "SliderInt",
         "value": 50,
         "label": "Number of agents:",
-        "min": 10,
-        "max": 200,
+        "min": 1,
+        "max": 100,
         "step": 1,
     },
     "width": {

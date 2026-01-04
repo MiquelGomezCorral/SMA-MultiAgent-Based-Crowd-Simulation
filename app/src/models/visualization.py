@@ -33,12 +33,16 @@ def create_page(initial_model, model_params):
         agent_portrayal=agent_portrayal
     )
     total_agents_plot = make_plot_component("total_agents")
+    local_density_plot = make_plot_component("local_density")
 
 
     page = SolaraViz(
         initial_model,  
         renderer,
-        components=[total_agents_plot],
+        components=[
+            total_agents_plot,
+            local_density_plot
+        ],
         model_params=model_params,
         name="Crowd Model",
     )

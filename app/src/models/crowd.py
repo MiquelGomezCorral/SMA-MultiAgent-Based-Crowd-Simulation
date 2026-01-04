@@ -6,7 +6,7 @@ from mesa.discrete_space import CellAgent, OrthogonalMooreGrid
 
 
 from src.config import Configuration
-from src.data import compute_total_agents
+from src.data import compute_total_agents, compute_local_density
 from src.utils import get_manhattan_distance
 
 # ==================================================================
@@ -35,7 +35,10 @@ class CrowdModel(mesa.Model):
 
         # ========== CREATE COLLECTORS ==========
         self.datacollector = DataCollector(
-            model_reporters={"total_agents": compute_total_agents},
+            model_reporters={
+                "total_agents": compute_total_agents,
+                "local_density": compute_local_density,
+            },
             agent_reporters={},
         )
         self.datacollector.collect(self)
@@ -51,11 +54,12 @@ class CrowdModel(mesa.Model):
             self.agent_types_ratios[key] /= total
 
     def _create_agents(self):
+        """Create agents and place them randomly on the grid."""
         agents = []
         cells = self.random.sample(self.grid.all_cells.cells, k=self.n_agents)
         
         for agent_type, ratio in self.agent_types_ratios.items():
-            n_type_agents = int(self.n_agents * ratio)
+            n_type_agents = int(np.round(self.n_agents * ratio))
             agents += CrowdAgent.create_agents(
                 self,
                 n_type_agents,
@@ -66,6 +70,7 @@ class CrowdModel(mesa.Model):
             agent.cell = cell
 
     def _create_exits(self):
+        """Create exit agents at predefined locations and compute distances."""
         self.exit_cells = [
             self.grid[(0, self.grid.height // 2)],
             self.grid[(self.grid.width - 1, self.grid.height // 2)],
@@ -78,6 +83,7 @@ class CrowdModel(mesa.Model):
             self._compute_exit_distance(cell, idx)
 
     def _compute_exit_distance(self, exit_cell, idx):
+        """Compute and store the distance from all cells to the given exit cell."""
         for cell in self.grid.all_cells.cells:
             if not hasattr(cell, 'exit_distances'):
                 cell.exit_distances = {}
@@ -127,22 +133,21 @@ class CrowdAgent(CellAgent):
     def step(self):
         if self.cell is None:
             return
+        
+        # Remove agent if reached exit
         if min(self.cell.exit_distances.values()) <= 1:
             self.cell = None
             self.model.agents.remove(self)
             return
 
-        # Decide whether to move based on speed
+        # Skip movement based on speed probability
         if self.random.random() > self.speed:
             return 
         
-        # Get valid neighboring cells (empty cells)
+        # Move to closest exit among empty neighboring cells
         valid_neighbors = [cell for cell in self.cell.neighborhood if cell.is_empty]
-        if not valid_neighbors:
-            return
-        
-        # Select the cell that is closest to an exit
-        self.cell = self.choose_cell(valid_neighbors)
+        if valid_neighbors:
+            self.cell = self.choose_cell(valid_neighbors)
 
     def choose_cell(self, valid_neighbors):
         min_distance = min(self.cell.exit_distances.values())
@@ -155,7 +160,31 @@ class CrowdAgent(CellAgent):
                     chosen_cell = cell
 
         return chosen_cell
+    
+    
+    def compute_local_density(self, proportion: bool = False):
+        """
+        Compute the local density of agents around this agent within a given radius.
+        
+        :param radius: Radius around the agent to consider
+        :param proportion: If True, return proportion of occupied cells (0 to 1); else return count
 
+        return: Local density as proportion or count
+        """
+        surounding_agents = [
+            cell for cell in self.cell.neighborhood if all([agent.agent_type != "exit" for agent in cell.agents]) and not cell.is_empty
+        ]
+
+        occupied_cells = len(surounding_agents)
+
+        if proportion:
+            total_cells = len(self.cell.neighborhood)
+            return occupied_cells / total_cells if total_cells > 0 else 0
+        else:
+            return occupied_cells
+    
+  
+    
 # ==================================================================
 #                               OBJECTS
 # ==================================================================
