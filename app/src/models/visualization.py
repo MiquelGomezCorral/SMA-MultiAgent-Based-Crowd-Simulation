@@ -49,7 +49,7 @@ def agent_portrayal(agent):
 
     if agent.agent_type == CrowdAgentEnum.POLITE:
         portrayal["color"] = "tab:blue"
-        portrayal["marker"] = "o"   # Diamond
+        portrayal["marker"] = "d"   # Diamond
     elif agent.agent_type == CrowdAgentEnum.AGGRESSIVE:
         portrayal["color"] = "tab:red"
         portrayal["marker"] = "v"   # Triangle

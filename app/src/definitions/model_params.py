@@ -7,7 +7,7 @@ basic_model_params = {
         "value": 50,
         "label": "Number of agents:",
         "min": 1,
-        "max": 100,
+        "max": 1000,
         "step": 1,
     },
     "width": {

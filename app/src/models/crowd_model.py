@@ -119,7 +119,7 @@ class CrowdModel(mesa.Model):
 
     def _create_walls(self):
         """Create wall agents around the grid perimeter."""
-        for xx in range(-7, 7):
+        for xx in range(-1, 1):
             x = xx + self.grid.width // 2 
             for y in range(3, self.grid.height - 3):
                 if y == self.grid.height // 2 or y == (self.grid.height // 2) - 1 or y == (self.grid.height // 2) + 1:
@@ -204,7 +204,6 @@ class CrowdModel(mesa.Model):
                     )
         else:
             raise ValueError(f"Unknown path finding algorithm: {self.path_finding_algorithm}")
-
                 
     def _initialize_max_values(self):
         self.max_density = self.datacollector.model_vars["local_density"][-1]
