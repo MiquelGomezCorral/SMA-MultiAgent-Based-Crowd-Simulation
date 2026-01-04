@@ -59,7 +59,12 @@ class CrowdModel(mesa.Model):
         self._initialize_max_values()
 
     def step(self):
-        self.agents.shuffle_do("step")
+        priority = self.agents.select(lambda a: a in self.priority_agents)
+        others = self.agents.select(lambda a: a in self.other_agents)
+        # 2. Step them in order
+        priority.shuffle_do("step")  # Priority moves first
+        others.shuffle_do("step")
+
         self._update_agent_count()
         self.datacollector.collect(self)
         self._update_max_values()
@@ -89,25 +94,30 @@ class CrowdModel(mesa.Model):
 
     def _create_agents(self):
         """Create agents and place them randomly on the grid."""
-        agents = []
+        self.priority_agents = []
+        self.other_agents = []
         empty_cells = [c for c in self.grid.all_cells if c.is_empty]
         cells = self.random.sample(empty_cells, k=self.initial_agents)
         
         for agent_type, ratio in self.agent_types_ratios.items():
             n_type_agents = int(np.round(self.initial_agents * ratio))
-            agents += CrowdAgent.create_agents(
+            agents = CrowdAgent.create_agents(
                 self,
                 n_type_agents,
                 agent_type = agent_type,
                 track_last_steps = self.track_last_steps
             )
+            if agent_type == CrowdAgentEnum.AGGRESSIVE:
+                self.priority_agents.extend(agents)
+            else: 
+                self.other_agents.extend(agents)
 
-        for agent, cell in zip(agents, cells):
+        for agent, cell in zip(self.priority_agents + self.other_agents, cells):
             agent.cell = cell
 
     def _create_walls(self):
         """Create wall agents around the grid perimeter."""
-        for xx in range(-3, 3):
+        for xx in range(-7, 7):
             x = xx + self.grid.width // 2 
             for y in range(3, self.grid.height - 3):
                 if y == self.grid.height // 2 or y == (self.grid.height // 2) - 1 or y == (self.grid.height // 2) + 1:
@@ -118,9 +128,9 @@ class CrowdModel(mesa.Model):
     def _create_exits(self):
         """Create exit agents at predefined locations and compute distances."""
         self.exit_cells = [
-            # self.grid[(0, self.grid.height // 2)],
+            self.grid[(0, self.grid.height // 2)],
             # self.grid[(self.grid.width - 1, self.grid.height // 2)],
-            self.grid[(self.grid.width // 3, self.grid.height // 2)],
+            # self.grid[(self.grid.width // 3, self.grid.height // 2)],
             # self.grid[(2 * self.grid.width // 3, self.grid.height // 2)],
         ]
         self.n_exits = len(self.exit_cells)
