@@ -2,7 +2,7 @@
 
 
 basic_model_params = {
-    "n_agents": {
+    "initial_agents": {
         "type": "SliderInt",
         "value": 50,
         "label": "Number of agents:",

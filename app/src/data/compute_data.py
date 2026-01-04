@@ -3,7 +3,7 @@
 
 def compute_total_agents(model):
     """Compute the total number of agents in the model."""
-    return len(model.agents) - len(model.exit_cells)  # Exclude exit agents
+    return model.current_agents
 
 def compute_local_density(model, proportion: bool = False):
     """
@@ -18,6 +18,11 @@ def compute_local_density(model, proportion: bool = False):
         agent.compute_local_density(proportion=proportion) for agent in model.agents if agent.agent_type != "exit"
     ]
     return (
-        sum(real_agents) / compute_total_agents(model) 
-        if compute_total_agents(model) > 0 else 0
+        sum(real_agents) / model.current_agents 
+        if model.current_agents > 0 else 0
     )
+
+def compute_evacuation_rate(model):
+    """Compute the evacuation rate of agents in the model."""
+    evacuated_agents = model.initial_agents - model.current_agents
+    return evacuated_agents / model.steps if model.steps > 0 else 0

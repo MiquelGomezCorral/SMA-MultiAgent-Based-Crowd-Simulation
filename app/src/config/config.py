@@ -16,7 +16,7 @@ class Configuration:
     exp_name: str = "base_name"
     width:    int = 10
     height:   int = 10
-    n_agents: int = 10
+    initial_agents: int = 10
 
     # BEHAVIOR RATIOS
     agent_types_ratios: dict = dataclasses.field(default_factory=lambda: {

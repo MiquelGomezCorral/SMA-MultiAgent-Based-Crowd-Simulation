@@ -6,7 +6,7 @@ from mesa.discrete_space import CellAgent, OrthogonalMooreGrid
 
 
 from src.config import Configuration
-from src.data import compute_total_agents, compute_local_density
+from src.data import compute_total_agents, compute_local_density, compute_evacuation_rate
 from src.utils import get_manhattan_distance
 
 # ==================================================================
@@ -17,7 +17,8 @@ class CrowdModel(mesa.Model):
 
     def __init__(self, CONFIG: Configuration):
         super().__init__(seed=CONFIG.seed)
-        self.n_agents = CONFIG.n_agents
+        self.initial_agents = CONFIG.initial_agents
+        self.current_agents = CONFIG.initial_agents
         self.agent_types_ratios = CONFIG.agent_types_ratios
         self._normalize_ratios()
 
@@ -38,6 +39,7 @@ class CrowdModel(mesa.Model):
             model_reporters={
                 "total_agents": compute_total_agents,
                 "local_density": compute_local_density,
+                "evacuation_rate": compute_evacuation_rate
             },
             agent_reporters={},
         )
@@ -45,6 +47,7 @@ class CrowdModel(mesa.Model):
 
     def step(self):
         self.agents.shuffle_do("step")
+        self._update_agent_count()
         self.datacollector.collect(self)
         self.check_model_end()
     
@@ -58,6 +61,13 @@ class CrowdModel(mesa.Model):
         if len(active_agents) == 0:
             self.running = False
 
+    def _update_agent_count(self):
+        """Update the current number of active agents."""
+        self.current_agents = len([
+            a for a in self.agents 
+            if a.agent_type not in ["exit", "wall"]
+        ])
+
     def _normalize_ratios(self):
         total = sum(self.agent_types_ratios.values())
         for key in self.agent_types_ratios:
@@ -66,10 +76,10 @@ class CrowdModel(mesa.Model):
     def _create_agents(self):
         """Create agents and place them randomly on the grid."""
         agents = []
-        cells = self.random.sample(self.grid.all_cells.cells, k=self.n_agents)
+        cells = self.random.sample(self.grid.all_cells.cells, k=self.initial_agents)
         
         for agent_type, ratio in self.agent_types_ratios.items():
-            n_type_agents = int(np.round(self.n_agents * ratio))
+            n_type_agents = int(np.round(self.initial_agents * ratio))
             agents += CrowdAgent.create_agents(
                 self,
                 n_type_agents,
@@ -102,10 +112,10 @@ class CrowdModel(mesa.Model):
 
 
 class CrowdModelWrapper(CrowdModel):
-    def __init__(self, n_agents=50, width=10, height=10, seed=42,
+    def __init__(self, initial_agents=50, width=10, height=10, seed=42,
                  polite_ratio=0.5, aggressive_ratio=0.3, slow_ratio=0.2):
         config = Configuration(
-            n_agents=n_agents,
+            initial_agents=initial_agents,
             width=width,
             height=height,
             seed=seed,
