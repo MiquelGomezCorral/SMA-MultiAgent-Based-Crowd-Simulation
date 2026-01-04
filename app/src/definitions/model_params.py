@@ -28,7 +28,7 @@ basic_model_params = {
     },
     "polite_ratio": {
         "type": "SliderFloat",
-        "value": 0.7,
+        "value": 0.5,
         "label": "Polite ratio:",
         "min": 0.0,
         "max": 1.0,
@@ -36,7 +36,7 @@ basic_model_params = {
     },
     "aggressive_ratio": {
         "type": "SliderFloat",
-        "value": 0.2,
+        "value": 0.3,
         "label": "Aggressive ratio:",
         "min": 0.0,
         "max": 1.0,
@@ -44,7 +44,7 @@ basic_model_params = {
     },
     "slow_ratio": {
         "type": "SliderFloat",
-        "value": 0.1,
+        "value": 0.2,
         "label": "Slow ratio:",
         "min": 0.0,
         "max": 1.0,

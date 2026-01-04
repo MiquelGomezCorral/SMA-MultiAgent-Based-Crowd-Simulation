@@ -1,7 +1,9 @@
+import numpy as np
+from typing import Literal
 import mesa
 from mesa import DataCollector
 from mesa.discrete_space import CellAgent, OrthogonalMooreGrid
-from typing import Literal
+
 
 from src.config import Configuration
 from src.data import compute_total_agents
@@ -16,6 +18,15 @@ class CrowdAgent(CellAgent):
         super().__init__(model)
         self.agent_type = agent_type
 
+        # The speed determines the probability of moving each step
+        # The higher the speed, the more likely the agent is to move
+        if agent_type == "polite":
+            self.speed = np.random.uniform(0.6, 1.0)
+        elif agent_type == "aggressive":
+            self.speed = np.random.uniform(0.8, 1.0)
+        elif agent_type == "slow":
+            self.speed = np.random.uniform(0.4, 0.6)
+
 
     def step(self):
         valid_neightbors = [cell for cell in self.cell.neighborhood if cell.is_empty]
@@ -27,10 +38,14 @@ class CrowdAgent(CellAgent):
         elif self.agent_type == "aggressive":
             chosen_cell = self.random.choice(valid_neightbors)
         elif self.agent_type == "slow":
-            if self.random.random() < 0.5:
-                chosen_cell = self.cell
-            else:
-                chosen_cell = self.random.choice(valid_neightbors)
+            chosen_cell = self.random.choice(valid_neightbors)
+            
+
+        if self.random.random() > self.speed:
+            chosen_cell = self.cell
+        else:
+            chosen_cell = self.random.choice(valid_neightbors)
+
 
         self.cell = chosen_cell
 
@@ -88,7 +103,7 @@ class CrowdModel(mesa.Model):
 
 class CrowdModelWrapper(CrowdModel):
     def __init__(self, n_agents=50, width=10, height=10, seed=42,
-                 polite_ratio=0.7, aggressive_ratio=0.2, slow_ratio=0.1):
+                 polite_ratio=0.5, aggressive_ratio=0.3, slow_ratio=0.2):
         config = Configuration(
             n_agents=n_agents,
             width=width,
