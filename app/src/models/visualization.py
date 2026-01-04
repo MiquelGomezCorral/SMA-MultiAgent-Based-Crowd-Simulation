@@ -79,17 +79,17 @@ def simulation_stats(model):
     # ========== formatting the text ==========
     text_content = f"""
     ### Simulation Status
-    | Metric | Value |
-    | :--- | ---: |
-    | **Step** | {step} |
-    | **Active Agents** | {last_count} |
-    | **Local Density** | {last_density:.2f} |
-    | **Evacuation Rate** | {evacuation_rate:.2f} |
-    | **Macro Avg Speed** | {macro_average_speed:.2f} |
-    | **Micro Avg Speed** | {micro_average_speed:.2f} |
+    | Metric | Value | Max |
+    | :--- | --- | ---: |
+    | **Step** | {step} | --- |
+    | **Active Agents** | {last_count} | {model.initial_agents} |
+    | **Local Density** | {last_density:.2f} | {model.max_density:.2f} |
+    | **Evacuation Rate** | {evacuation_rate:.2f} | {model.max_evacuation_rate:.2f} |
+    | **Macro Avg Speed** | {macro_average_speed:.2f} | {model.max_macro_average_speed:.2f} |
+    | **Micro Avg Speed** | {micro_average_speed:.2f} | {model.max_micro_average_speed:.2f} |
     """
     
     if not model.running:
-        text_content += f"\n**FINISHED!** Total time: `{step}` steps."
+        text_content += f"**FINISHED!** Total time: `{step}` steps."
 
     return solara.Markdown(text_content)

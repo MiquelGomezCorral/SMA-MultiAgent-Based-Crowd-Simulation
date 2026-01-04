@@ -50,11 +50,13 @@ class CrowdModel(mesa.Model):
             agent_reporters={},
         )
         self.datacollector.collect(self)
+        self._initialize_max_values()
 
     def step(self):
         self.agents.shuffle_do("step")
         self._update_agent_count()
         self.datacollector.collect(self)
+        self._update_max_values()
         self.check_model_end()
     
     def check_model_end(self):
@@ -116,6 +118,33 @@ class CrowdModel(mesa.Model):
 
             cell.exit_distances[idx] = get_manhattan_distance(cell, exit_cell)
 
+    def _initialize_max_values(self):
+        self.max_density = self.datacollector.model_vars["local_density"][-1]
+        self.max_evacuation_rate = self.datacollector.model_vars["evacuation_rate"][-1]
+        self.max_macro_average_speed = self.datacollector.model_vars["macro_average_speed"][-1]
+        self.max_micro_average_speed = self.datacollector.model_vars["micro_average_speed"][-1]
+
+    def _update_max_values(self):
+        self.max_density = (
+            self.datacollector.model_vars["local_density"][-1]
+            if self.datacollector.model_vars["local_density"][-1] > self.max_density 
+            else self.max_density
+        )
+        self.max_evacuation_rate = (
+            self.datacollector.model_vars["evacuation_rate"][-1]
+            if self.datacollector.model_vars["evacuation_rate"][-1] > self.max_evacuation_rate 
+            else self.max_evacuation_rate
+        )
+        self.max_macro_average_speed = (
+            self.datacollector.model_vars["macro_average_speed"][-1]
+            if self.datacollector.model_vars["macro_average_speed"][-1] > self.max_macro_average_speed 
+            else self.max_macro_average_speed
+        )
+        self.max_micro_average_speed = (
+            self.datacollector.model_vars["micro_average_speed"][-1]
+            if self.datacollector.model_vars["micro_average_speed"][-1] > self.max_micro_average_speed 
+            else self.max_micro_average_speed
+        )
 
 class CrowdModelWrapper(CrowdModel):
     def __init__(self, initial_agents=50, width=10, height=10, seed=42,
