@@ -2,14 +2,12 @@
 
 from mesa.visualization import SolaraViz, SpaceRenderer, make_plot_component
 from mesa.visualization.components import AgentPortrayalStyle
-import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
 
 def agent_portrayal(agent):
     portrayal = {
         "color": "black",
         "size": 80,         
-        "alpha": 0.8,
+        "alpha": 1.0,
     }
 
     if agent.agent_type == "polite":
@@ -32,11 +30,13 @@ def create_page(initial_model, model_params):
     renderer = SpaceRenderer(model=initial_model, backend="matplotlib").render(
         agent_portrayal=agent_portrayal
     )
+    total_agents_plot = make_plot_component("total_agents")
+
 
     page = SolaraViz(
         initial_model,  
         renderer,
-        components=[],
+        components=[total_agents_plot],
         model_params=model_params,
         name="Crowd Model",
     )
