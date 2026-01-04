@@ -21,12 +21,6 @@ class CrowdModel(mesa.Model):
         self.agent_types_ratios = CONFIG.agent_types_ratios
         self._normalize_ratios()
 
-        # ========== CREATE COLLECTORS ==========
-        self.datacollector = DataCollector(
-            model_reporters={"total_agents": compute_total_agents},
-            agent_reporters={},
-        )
-        self.datacollector.collect(self)
 
         # ========== CREATE GRID ==========
         self.grid = OrthogonalMooreGrid(
@@ -38,6 +32,13 @@ class CrowdModel(mesa.Model):
         # ========== CREATE AGENTS ==========
         self._create_agents()
         self._create_exits()
+
+        # ========== CREATE COLLECTORS ==========
+        self.datacollector = DataCollector(
+            model_reporters={"total_agents": compute_total_agents},
+            agent_reporters={},
+        )
+        self.datacollector.collect(self)
 
     def step(self):
         self.agents.shuffle_do("step")
@@ -124,6 +125,13 @@ class CrowdAgent(CellAgent):
 
 
     def step(self):
+        if self.cell is None:
+            return
+        if min(self.cell.exit_distances.values()) <= 1:
+            self.cell = None
+            self.model.agents.remove(self)
+            return
+
         # Decide whether to move based on speed
         if self.random.random() > self.speed:
             return 
