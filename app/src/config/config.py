@@ -12,19 +12,23 @@ from argparse import Namespace
 class Configuration:
     """Configuration class for the project."""
 
-    exp_name: str = "base_name"
     seed:     int = 42
+    exp_name: str = "base_name"
+    width:    int = 10
+    height:   int = 10
+    n_agents: int = 10
 
-    gym_id:          str = None
-    learning_rate: float = 2.5e-4
-    total_timesteps: int = 25_000
+    # BEHAVIOR RATIOS
+    agent_types_ratios: dict = dataclasses.field(default_factory=lambda: {
+        "polite": 0.7,
+        "aggressive": 0.2,
+        "slow": 0.1,
+    })
 
-    torch_deterministic: bool = True
-    cuda:                bool = True
-
-    track_run:         bool = False
-    wandb_project_name: str = "RL"
-    wandb_entity:       str = None
 
     def __post_init__(self):
         ...
+
+    def to_dict(self) -> dict:
+        """Convert Configuration to dictionary."""
+        return dataclasses.asdict(self)
