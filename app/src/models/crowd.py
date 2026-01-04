@@ -7,6 +7,7 @@ from mesa.discrete_space import CellAgent, OrthogonalMooreGrid
 
 from src.config import Configuration
 from src.data import compute_total_agents
+from src.utils import get_manhattan_distance
 
 # ==================================================================
 #                               MODEL
@@ -37,7 +38,6 @@ class CrowdModel(mesa.Model):
         # ========== CREATE AGENTS ==========
         self._create_agents()
         self._create_exits()
-        self._compute_exit_distances()
 
     def step(self):
         self.agents.shuffle_do("step")
@@ -71,13 +71,18 @@ class CrowdModel(mesa.Model):
         ]
         self.n_exits = len(self.exit_cells)
 
-
-        for cell in self.exit_cells:
+        for idx, cell in enumerate(self.exit_cells):
             exit_agent = CrowdExit(self)
             exit_agent.cell = cell
+            self._compute_exit_distance(cell, idx)
 
-    def _compute_exit_distances(self):
-        ...
+    def _compute_exit_distance(self, exit_cell, idx):
+        for cell in self.grid.all_cells.cells:
+            if not hasattr(cell, 'exit_distances'):
+                cell.exit_distances = {}
+
+            cell.exit_distances[idx] = get_manhattan_distance(cell, exit_cell)
+
 
 class CrowdModelWrapper(CrowdModel):
     def __init__(self, n_agents=50, width=10, height=10, seed=42,
