@@ -51,11 +51,15 @@ class CrowdAgent(CellAgent):
             self.model.agents.remove(self)
             return
 
+        # Else move
+        self.move()
+    
+    def move(self):
+        """Move to closest exit among empty neighboring cells"""
         # Skip movement based on speed probability
         if self.random.random() > self.speed:
             return 
         
-        # Move to closest exit among empty neighboring cells
         valid_neighbors = [cell for cell in self.cell.neighborhood if cell.is_empty]
         if valid_neighbors:
             self.cell, moved = self.choose_cell(valid_neighbors)
@@ -91,6 +95,10 @@ class CrowdAgent(CellAgent):
 
         return: Local density as proportion or count
         """
+        # Agent has been removed from grid
+        if self.cell is None:
+            return 0
+        
         surounding_agents = [
             cell for cell in self.cell.neighborhood 
             if all([agent.agent_type not in STATIC_AGENTS for agent in cell.agents]) 

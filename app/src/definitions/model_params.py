@@ -12,7 +12,7 @@ basic_model_params = {
     },
     "width": {
         "type": "SliderInt",
-        "value": 10,
+        "value": 30,
         "label": "Grid width:",
         "min": 5,
         "max": 50,
@@ -20,7 +20,7 @@ basic_model_params = {
     },
     "height": {
         "type": "SliderInt",
-        "value": 10,
+        "value": 30,
         "label": "Grid height:",
         "min": 5,
         "max": 50,

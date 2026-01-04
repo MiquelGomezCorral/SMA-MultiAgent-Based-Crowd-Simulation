@@ -97,6 +97,8 @@ class CrowdModel(mesa.Model):
         self.priority_agents = []
         self.other_agents = []
         empty_cells = [c for c in self.grid.all_cells if c.is_empty]
+        if len(empty_cells) < self.initial_agents:
+            raise ValueError("Not enough empty cells to place all agents.")
         cells = self.random.sample(empty_cells, k=self.initial_agents)
         
         for agent_type, ratio in self.agent_types_ratios.items():
@@ -128,7 +130,8 @@ class CrowdModel(mesa.Model):
     def _create_exits(self):
         """Create exit agents at predefined locations and compute distances."""
         self.exit_cells = [
-            self.grid[(0, self.grid.height // 2)],
+            self.grid[(0, 0)],
+            # self.grid[(0, self.grid.height // 2)],
             # self.grid[(self.grid.width - 1, self.grid.height // 2)],
             # self.grid[(self.grid.width // 3, self.grid.height // 2)],
             # self.grid[(2 * self.grid.width // 3, self.grid.height // 2)],
@@ -232,7 +235,7 @@ class CrowdModel(mesa.Model):
         )
 
 class CrowdModelWrapper(CrowdModel):
-    def __init__(self, initial_agents=50, width=10, height=10, seed=42,
+    def __init__(self, initial_agents=50, width=30, height=30, seed=42,
                  polite_ratio=0.5, aggressive_ratio=0.3, slow_ratio=0.2, track_last_steps=5):
         config = Configuration(
             initial_agents=initial_agents,
