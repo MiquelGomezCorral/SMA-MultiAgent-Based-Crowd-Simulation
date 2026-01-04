@@ -1,15 +1,17 @@
+"""Model module for the Crowd Simulation."""
+
+import heapq
 import numpy as np
 import mesa
 from mesa import DataCollector
 from mesa.discrete_space import OrthogonalMooreGrid
-
 
 from src.config import Configuration
 from src.data import (
     compute_total_agents, compute_local_density, compute_evacuation_rate,
     compute_macro_average_speed, compute_micro_average_speed
 )
-from src.utils import get_manhattan_distance
+from src.utils import get_manhattan_distance, get_l2_distance
 
 from .crowd_agents import CrowdAgent, CrowdExit, CrowdAgentEnum, CrowdWall, STATIC_AGENTS
 
@@ -38,9 +40,9 @@ class CrowdModel(mesa.Model):
         )
     
         # ========== CREATE AGENTS ==========
-        self._create_agents()
         self._create_walls()
         self._create_exits()
+        self._create_agents()
 
         # ========== CREATE COLLECTORS ==========
         self.datacollector = DataCollector(
@@ -88,7 +90,8 @@ class CrowdModel(mesa.Model):
     def _create_agents(self):
         """Create agents and place them randomly on the grid."""
         agents = []
-        cells = self.random.sample(self.grid.all_cells.cells, k=self.initial_agents)
+        empty_cells = [c for c in self.grid.all_cells if c.is_empty]
+        cells = self.random.sample(empty_cells, k=self.initial_agents)
         
         for agent_type, ratio in self.agent_types_ratios.items():
             n_type_agents = int(np.round(self.initial_agents * ratio))
@@ -104,10 +107,13 @@ class CrowdModel(mesa.Model):
 
     def _create_walls(self):
         """Create wall agents around the grid perimeter."""
-        x = self.grid.width // 2
-        for y in range(1, self.grid.height - 1):
-            wall_agent = CrowdWall(self)
-            wall_agent.cell = self.grid[(x, y)]
+        for xx in range(-3, 3):
+            x = xx + self.grid.width // 2 
+            for y in range(3, self.grid.height - 3):
+                if y == self.grid.height // 2 or y == (self.grid.height // 2) - 1 or y == (self.grid.height // 2) + 1:
+                    continue  # Leave exit gap
+                wall_agent = CrowdWall(self)
+                wall_agent.cell = self.grid[(x, y)]
 
     def _create_exits(self):
         """Create exit agents at predefined locations and compute distances."""
@@ -132,22 +138,26 @@ class CrowdModel(mesa.Model):
                     cell.exit_distances = {}
 
                 cell.exit_distances[idx] = get_manhattan_distance(cell, exit_cell)
-        elif self.path_finding_algorithm == "BFS":
-            visited = set()
-            queue = [exit_cell]
+        elif self.path_finding_algorithm == "BFS" or self.path_finding_algorithm == "A*":
+            visited, queue, queue_count = set(), [], 0
 
             if not hasattr(exit_cell, 'exit_distances'):
                 exit_cell.exit_distances = {}
-            exit_cell.exit_distances[idx] = 0
+            exit_cell.exit_distances[idx] = {
+                "G": 0,
+                "F": 0,
+                "Total": 0
+            }
+            heapq.heappush(queue, (0, 0, exit_cell))
 
             while queue:
-                cell = queue.pop(0)
+                cell = heapq.heappop(queue)[2]
                 if cell in visited:
                     continue
                 visited.add(cell)
 
                 # Cells that are at distance 1 and are not static and have not been visited
-                new_cells = [
+                open_cells = [
                     neighbor for neighbor in cell.neighborhood 
                     if neighbor not in visited
                     and neighbor not in queue
@@ -157,16 +167,32 @@ class CrowdModel(mesa.Model):
                     )
                 ]    
 
-                for neighbor in new_cells:
-                    if not hasattr(neighbor, 'exit_distances'):
-                        neighbor.exit_distances = {}
-                    neighbor.exit_distances[idx] = cell.exit_distances[idx] + 1
-                    queue.append(neighbor)
+                for open_cell in open_cells:
+                    queue_count += 1
+                    if not hasattr(open_cell, 'exit_distances'):
+                        open_cell.exit_distances = {}
+                    open_cell.exit_distances[idx] = {
+                        "G": cell.exit_distances[idx]["G"] + 1,
+                        "F": 0,
+                    }
+
+                    if self.path_finding_algorithm == "A*":
+                        open_cell.exit_distances[idx]["F"] = get_l2_distance(open_cell, exit_cell)
+                    
+                    open_cell.exit_distances[idx]["Total"] = (
+                        open_cell.exit_distances[idx]["G"] + open_cell.exit_distances[idx]["F"]
+                    )
+                    heapq.heappush(
+                        queue, (
+                            open_cell.exit_distances[idx]["Total"], 
+                            queue_count, # For tie-breaking
+                            open_cell
+                        )
+                    )
         else:
             raise ValueError(f"Unknown path finding algorithm: {self.path_finding_algorithm}")
 
                 
-
     def _initialize_max_values(self):
         self.max_density = self.datacollector.model_vars["local_density"][-1]
         self.max_evacuation_rate = self.datacollector.model_vars["evacuation_rate"][-1]

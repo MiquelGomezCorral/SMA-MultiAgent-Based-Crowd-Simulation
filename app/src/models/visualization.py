@@ -118,7 +118,7 @@ def heatmap_component(model):
         x, y = cell.coordinate
         exit_distances = getattr(cell, "exit_distances", {})
         if exit_distances:
-            data[y, x] = min(exit_distances.values())
+            data[y, x] = min([val["Total"] for val in exit_distances.values()])
         else:
             data[y, x] = np.nan  # or some other value indicating no exit
 

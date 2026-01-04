@@ -17,7 +17,7 @@ class Configuration:
     height:   int = 10
     initial_agents: int = 10
     track_last_steps: int = 5
-    path_finding_algorithm: Literal["MANHATTAN", "BFS"] = "BFS"
+    path_finding_algorithm: Literal["MANHATTAN", "BFS", "A*"] = "A*"
 
     # BEHAVIOR RATIOS
     agent_types_ratios: dict = dataclasses.field(default_factory=lambda: {

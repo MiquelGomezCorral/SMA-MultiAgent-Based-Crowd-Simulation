@@ -1,3 +1,5 @@
+"""Module defining crowd agents for the simulation."""
+
 import numpy as np
 from mesa.discrete_space import CellAgent
 
@@ -40,8 +42,11 @@ class CrowdAgent(CellAgent):
         if self.cell is None:
             return
         
-        # Remove agent if reached exit
-        if min(self.cell.exit_distances.values()) <= 1:
+        # Remove agent if reached exit (i.e., neighboring an exit cell)
+        if any(
+            any(agent.agent_type == CrowdAgentEnum.EXIT for agent in neighbor.agents) 
+            for neighbor in self.cell.neighborhood
+        ):
             self.cell = None
             self.model.agents.remove(self)
             return
@@ -64,13 +69,13 @@ class CrowdAgent(CellAgent):
         Choose the neighboring cell that is closest to any exit.
         :param valid_neighbors: List of neighboring cells that are valid for movement
         """
-        min_distance = min(self.cell.exit_distances.values())
+        min_distance = min([val["Total"] for val in self.cell.exit_distances.values()])
         chosen_cell = self.cell
         moved = False
         for cell in valid_neighbors:
             for exit_idx, exit_distance in cell.exit_distances.items():
-                if exit_distance < min_distance:
-                    min_distance = exit_distance
+                if exit_distance["Total"] < min_distance:
+                    min_distance = exit_distance["Total"]
                     chosen_cell = cell
                     moved = True
 
