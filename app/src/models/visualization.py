@@ -5,6 +5,7 @@ import solara
 from mesa.visualization import SolaraViz, SpaceRenderer, make_plot_component
 from mesa.visualization.components import AgentPortrayalStyle
 
+from .crowd_agents import CrowdAgentEnum
 # ==================================================================
 #                           VISUALIZATION
 # ==================================================================
@@ -44,17 +45,21 @@ def agent_portrayal(agent):
         "alpha": 1.0,
     }
 
-    if agent.agent_type == "polite":
+    if agent.agent_type == CrowdAgentEnum.POLITE:
         portrayal["color"] = "tab:blue"
         portrayal["marker"] = "o"   # Diamond
-    elif agent.agent_type == "aggressive":
+    elif agent.agent_type == CrowdAgentEnum.AGGRESSIVE:
         portrayal["color"] = "tab:red"
         portrayal["marker"] = "v"   # Triangle
-    elif agent.agent_type == "slow":
-        portrayal["color"] = "#505469"
+    elif agent.agent_type == CrowdAgentEnum.SLOW:
+        portrayal["color"] = "#179665"
         portrayal["marker"] = "o"   # Circle
-    elif agent.agent_type == "exit":
+    elif agent.agent_type == CrowdAgentEnum.EXIT:
         portrayal["color"] = "tab:green"
+        portrayal["marker"] = "s"   # Square
+        portrayal["size"] = 200
+    elif agent.agent_type == CrowdAgentEnum.WALL:
+        portrayal["color"] = "tab:gray"
         portrayal["marker"] = "s"   # Square
         portrayal["size"] = 200
     

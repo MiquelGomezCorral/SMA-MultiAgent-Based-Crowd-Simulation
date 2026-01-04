@@ -3,5 +3,6 @@
 Functions to manage, create, train / test models.
 """
 
-from .crowd import CrowdAgent, CrowdModel, CrowdModelWrapper
+from .crowd_model import CrowdModel, CrowdModelWrapper
 from .visualization import create_page
+from .crowd_agents import CrowdAgentEnum, CrowdAgent, CrowdExit, CrowdWall, STATIC_AGENTS
