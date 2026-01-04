@@ -116,33 +116,37 @@ class CrowdAgent(CellAgent):
         # The speed determines the probability of moving each step
         # The higher the speed, the more likely the agent is to move
         if agent_type == "polite":
-            self.speed = np.random.uniform(0.6, 1.0)
+            self.speed = np.random.uniform(0.65, 1.0)
         elif agent_type == "aggressive":
             self.speed = np.random.uniform(0.8, 1.0)
         elif agent_type == "slow":
-            self.speed = np.random.uniform(0.4, 0.6)
+            self.speed = np.random.uniform(0.5, 0.65)
 
 
     def step(self):
-        valid_neightbors = [cell for cell in self.cell.neighborhood if cell.is_empty]
-        if not valid_neightbors:
+        # Decide whether to move based on speed
+        if self.random.random() > self.speed:
+            return 
+        
+        # Get valid neighboring cells (empty cells)
+        valid_neighbors = [cell for cell in self.cell.neighborhood if cell.is_empty]
+        if not valid_neighbors:
             return
         
-        if self.agent_type == "polite":
-            chosen_cell = self.random.choice(valid_neightbors)
-        elif self.agent_type == "aggressive":
-            chosen_cell = self.random.choice(valid_neightbors)
-        elif self.agent_type == "slow":
-            chosen_cell = self.random.choice(valid_neightbors)
-            
+        # Select the cell that is closest to an exit
+        self.cell = self.choose_cell(valid_neighbors)
 
-        if self.random.random() > self.speed:
-            chosen_cell = self.cell
-        else:
-            chosen_cell = self.random.choice(valid_neightbors)
+    def choose_cell(self, valid_neighbors):
+        min_distance = min(self.cell.exit_distances.values())
+        chosen_cell = self.cell
 
+        for cell in valid_neighbors:
+            for exit_idx, exit_distance in cell.exit_distances.items():
+                if exit_distance < min_distance:
+                    min_distance = exit_distance
+                    chosen_cell = cell
 
-        self.cell = chosen_cell
+        return chosen_cell
 
 # ==================================================================
 #                               OBJECTS
