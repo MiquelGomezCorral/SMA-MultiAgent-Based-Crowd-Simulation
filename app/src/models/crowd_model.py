@@ -25,6 +25,7 @@ class CrowdModel(mesa.Model):
         self.current_agents = CONFIG.initial_agents
         self.agent_types_ratios = CONFIG.agent_types_ratios
         self.track_last_steps = CONFIG.track_last_steps
+        self.path_finding_algorithm = CONFIG.path_finding_algorithm
         self.STATIC_AGENTS = STATIC_AGENTS
         self._normalize_ratios()
 
@@ -111,9 +112,9 @@ class CrowdModel(mesa.Model):
     def _create_exits(self):
         """Create exit agents at predefined locations and compute distances."""
         self.exit_cells = [
-            self.grid[(0, self.grid.height // 2)],
+            # self.grid[(0, self.grid.height // 2)],
             # self.grid[(self.grid.width - 1, self.grid.height // 2)],
-            # self.grid[(self.grid.width // 3, self.grid.height // 2)],
+            self.grid[(self.grid.width // 3, self.grid.height // 2)],
             # self.grid[(2 * self.grid.width // 3, self.grid.height // 2)],
         ]
         self.n_exits = len(self.exit_cells)
@@ -125,11 +126,46 @@ class CrowdModel(mesa.Model):
 
     def _compute_exit_distance(self, exit_cell, idx):
         """Compute and store the distance from all cells to the given exit cell."""
-        for cell in self.grid.all_cells.cells:
-            if not hasattr(cell, 'exit_distances'):
-                cell.exit_distances = {}
+        if self.path_finding_algorithm == "MANHATTAN":
+            for cell in self.grid.all_cells.cells:
+                if not hasattr(cell, 'exit_distances'):
+                    cell.exit_distances = {}
 
-            cell.exit_distances[idx] = get_manhattan_distance(cell, exit_cell)
+                cell.exit_distances[idx] = get_manhattan_distance(cell, exit_cell)
+        elif self.path_finding_algorithm == "BFS":
+            visited = set()
+            queue = [exit_cell]
+
+            if not hasattr(exit_cell, 'exit_distances'):
+                exit_cell.exit_distances = {}
+            exit_cell.exit_distances[idx] = 0
+
+            while queue:
+                cell = queue.pop(0)
+                if cell in visited:
+                    continue
+                visited.add(cell)
+
+                # Cells that are at distance 1 and are not static and have not been visited
+                new_cells = [
+                    neighbor for neighbor in cell.neighborhood 
+                    if neighbor not in visited
+                    and neighbor not in queue
+                    and (
+                        neighbor.is_empty 
+                        or all(agent.agent_type not in STATIC_AGENTS for agent in neighbor.agents)
+                    )
+                ]    
+
+                for neighbor in new_cells:
+                    if not hasattr(neighbor, 'exit_distances'):
+                        neighbor.exit_distances = {}
+                    neighbor.exit_distances[idx] = cell.exit_distances[idx] + 1
+                    queue.append(neighbor)
+        else:
+            raise ValueError(f"Unknown path finding algorithm: {self.path_finding_algorithm}")
+
+                
 
     def _initialize_max_values(self):
         self.max_density = self.datacollector.model_vars["local_density"][-1]

@@ -2,6 +2,7 @@
 
 import numpy as np
 import solara
+import matplotlib.pyplot as plt
 from mesa.visualization import SolaraViz, SpaceRenderer, make_plot_component
 from mesa.visualization.components import AgentPortrayalStyle
 
@@ -27,6 +28,7 @@ def create_page(initial_model, model_params):
             total_agents_plot,
             rates_plot,
             average_speed_plot,
+            heatmap_component,
         ],
         model_params=model_params,
         name="Crowd Model",
@@ -100,3 +102,32 @@ def simulation_stats(model):
         text_content += f"**FINISHED!** Total time: `{step}` steps."
 
     return solara.Markdown(text_content)
+
+def heatmap_component(model):
+    """
+    Renders a heatmap of a specific cell property.
+    """
+    fig = plt.Figure(figsize=(5, 5))
+    ax = fig.subplots()
+    
+    # Extract Data into a Matrix
+    w, h = model.grid.width, model.grid.height
+    data = np.zeros((h, w)) 
+
+    for cell in model.grid.all_cells:
+        x, y = cell.coordinate
+        exit_distances = getattr(cell, "exit_distances", {})
+        if exit_distances:
+            data[y, x] = min(exit_distances.values())
+        else:
+            data[y, x] = np.nan  # or some other value indicating no exit
+
+    #. Plot Heatmap
+    im = ax.imshow(data, origin='lower', cmap='viridis', interpolation='nearest')
+    
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04) 
+    ax.set_title("Closest Exit Distance Heatmap")
+    ax.set_xticks([]) # Hide ticks for cleanliness
+    ax.set_yticks([])
+
+    return solara.FigureMatplotlib(fig)
