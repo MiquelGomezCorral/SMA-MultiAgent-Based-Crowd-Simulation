@@ -1,6 +1,7 @@
 """Visualization module for the Crowd Model using Mesa's SolaraViz."""
-import solara
 
+import numpy as np
+import solara
 from mesa.visualization import SolaraViz, SpaceRenderer, make_plot_component
 from mesa.visualization.components import AgentPortrayalStyle
 
@@ -70,6 +71,7 @@ def simulation_stats(model):
     # ========== Data ==========
     step = model.steps
     last_density = model.datacollector.model_vars["local_density"][-1]
+    avg_density = np.mean(model.datacollector.model_vars["local_density"])
     last_count = model.datacollector.model_vars["total_agents"][-1]
     evacuation_rate = model.datacollector.model_vars["evacuation_rate"][-1]
     macro_average_speed = model.datacollector.model_vars["macro_average_speed"][-1]
@@ -79,14 +81,14 @@ def simulation_stats(model):
     # ========== formatting the text ==========
     text_content = f"""
     ### Simulation Status
-    | Metric | Value | Max |
-    | :--- | --- | ---: |
-    | **Step** | {step} | --- |
-    | **Active Agents** | {last_count} | {model.initial_agents} |
-    | **Local Density** | {last_density:.2f} | {model.max_density:.2f} |
-    | **Evacuation Rate** | {evacuation_rate:.2f} | {model.max_evacuation_rate:.2f} |
-    | **Macro Avg Speed** | {macro_average_speed:.2f} | {model.max_macro_average_speed:.2f} |
-    | **Micro Avg Speed** | {micro_average_speed:.2f} | {model.max_micro_average_speed:.2f} |
+    | Metric | Current | Max | Avg |
+    | :--- | --- | --- | ---: |
+    | **Step** | {step} | --- | --- |
+    | **Active Agents** | {last_count} | {model.initial_agents} | --- |
+    | **Local Density** | {last_density:.2f} | {model.max_density:.2f} | {avg_density:.2f} |
+    | **Evacuation Rate** | --- | {model.max_evacuation_rate:.2f} | {evacuation_rate:.2f} |
+    | **Macro Avg Speed** | --- | {model.max_macro_average_speed:.2f} | {macro_average_speed:.2f} |
+    | **Micro Avg Speed** | {micro_average_speed:.2f} | {model.max_micro_average_speed:.2f} | --- |
     """
     
     if not model.running:
