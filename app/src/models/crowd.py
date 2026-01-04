@@ -46,7 +46,17 @@ class CrowdModel(mesa.Model):
     def step(self):
         self.agents.shuffle_do("step")
         self.datacollector.collect(self)
+        self.check_model_end()
+    
+    def check_model_end(self):
+        """Check if there are any active agents left in the model."""
+        active_agents = [
+            a for a in self.agents 
+            if a.agent_type not in ["exit", "wall"]
+        ]
 
+        if len(active_agents) == 0:
+            self.running = False
 
     def _normalize_ratios(self):
         total = sum(self.agent_types_ratios.values())
