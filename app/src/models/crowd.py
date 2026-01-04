@@ -102,6 +102,8 @@ class CrowdModel(mesa.Model):
         self.exit_cells = [
             self.grid[(0, self.grid.height // 2)],
             self.grid[(self.grid.width - 1, self.grid.height // 2)],
+            self.grid[(self.grid.width // 3, self.grid.height // 2)],
+            self.grid[(2 * self.grid.width // 3, self.grid.height // 2)],
         ]
         self.n_exits = len(self.exit_cells)
 
