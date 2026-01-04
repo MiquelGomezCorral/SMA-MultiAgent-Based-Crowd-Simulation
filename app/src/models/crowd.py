@@ -70,3 +70,18 @@ class CrowdModel(mesa.Model):
         for key in self.agent_types_ratios:
             self.agent_types_ratios[key] /= total
 
+class CrowdModelWrapper(CrowdModel):
+    def __init__(self, n_agents=50, width=10, height=10, seed=42,
+                 polite_ratio=0.7, aggressive_ratio=0.2, slow_ratio=0.1):
+        config = Configuration(
+            n_agents=n_agents,
+            width=width,
+            height=height,
+            seed=seed,
+            agent_types_ratios={
+                "polite": polite_ratio,
+                "aggressive": aggressive_ratio,
+                "slow": slow_ratio
+            }
+        )
+        super().__init__(config)
