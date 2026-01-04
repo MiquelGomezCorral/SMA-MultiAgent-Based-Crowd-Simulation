@@ -18,12 +18,12 @@ STATIC_AGENTS = [CrowdAgentEnum.EXIT, CrowdAgentEnum.WALL]
 class CrowdAgent(CellAgent):
     """And agent that moves in a crowd following simple rules."""
 
-    def __init__(self, model, agent_type: CrowdAgentEnum = CrowdAgentEnum.POLITE, track_last_steps: int = 5, exit_idx: int = None):
+    def __init__(self, model, agent_type: CrowdAgentEnum = CrowdAgentEnum.POLITE, track_last_steps: int = 5, number_of_exits: int = None):
         super().__init__(model)
         self.agent_type = agent_type
         self.cells_moved = 0
         self.cells_moved_last_steps = [0] * track_last_steps  # For averaging speed over last steps
-        self.exit_idx = exit_idx
+        self.exit_idx = model.random.randint(0, number_of_exits - 1) if number_of_exits is not None else None
         # The speed determines the probability of moving each step
         # The higher the speed, the more likely the agent is to move
         if agent_type == CrowdAgentEnum.POLITE:
@@ -73,24 +73,30 @@ class CrowdAgent(CellAgent):
         Choose the neighboring cell that is closest to any exit.
         :param valid_neighbors: List of neighboring cells that are valid for movement
         """
-        min_distance = min([val["Total"] for val in self.cell.exit_distances.values()])
-        chosen_cell = self.cell
-        moved = False
-        for cell in valid_neighbors:
+        def get_cell_min_distance(cell):
+            """Get minimum distance from cell to target exit(s)."""
             if self.exit_idx is None:
-                for exit_idx, exit_distance in cell.exit_distances.items():
-                    if exit_distance["Total"] < min_distance:
-                        min_distance = exit_distance["Total"]
-                        chosen_cell = cell
-                        moved = True
+                # Find distance to closest exit
+                return min(dist["Total"] for dist in cell.exit_distances.values())
             else:
-                exit_distance = cell.exit_distances.get(self.exit_idx, None)
-                if exit_distance and exit_distance["Total"] < min_distance:
-                    min_distance = exit_distance["Total"]
-                    chosen_cell = cell
-                    moved = True
-
-        return chosen_cell, moved
+                # Get distance to assigned exit only
+                exit_distance = cell.exit_distances.get(self.exit_idx)
+                return exit_distance["Total"] if exit_distance else float('inf')
+        
+        # Find the neighbor with minimum distance to target exit
+        best_cell = min(valid_neighbors, key=get_cell_min_distance, default=None)
+        
+        if best_cell is None:
+            return self.cell, False
+        
+        # Check if the best neighbor is better than staying in current cell
+        current_min_distance = get_cell_min_distance(self.cell)
+        best_min_distance = get_cell_min_distance(best_cell)
+        
+        if best_min_distance < current_min_distance:
+            return best_cell, True
+        
+        return self.cell, False
     
     
     def compute_local_density(self, proportion: bool = False):

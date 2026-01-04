@@ -61,7 +61,7 @@ basic_model_params = {
     "differentiate_exits": {
         "type": "Checkbox",
         "value": True,
-        "label": "Differentiate exits",
+        "label": "Differentiate exits (No is evacuation / Yes is exit-specific)",
     },
     "path_finding_algorithm": {
         "type": "Select",

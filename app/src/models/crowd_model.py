@@ -28,6 +28,7 @@ class CrowdModel(mesa.Model):
         self.agent_types_ratios = CONFIG.agent_types_ratios
         self.track_last_steps = CONFIG.track_last_steps
         self.path_finding_algorithm = CONFIG.path_finding_algorithm
+        self.differentiate_exits = CONFIG.differentiate_exits
         self.STATIC_AGENTS = STATIC_AGENTS
         self._normalize_ratios()
 
@@ -108,7 +109,7 @@ class CrowdModel(mesa.Model):
                 n_type_agents,
                 agent_type = agent_type,
                 track_last_steps = self.track_last_steps,
-                exit_idx = np.random.randint(0, self.n_exits)
+                number_of_exits = self.n_exits if self.differentiate_exits else None,
             )
             if agent_type == CrowdAgentEnum.AGGRESSIVE:
                 self.priority_agents.extend(agents)
@@ -132,6 +133,9 @@ class CrowdModel(mesa.Model):
         """Create exit agents at predefined locations and compute distances."""
         self.exit_cells = [
             self.grid[(0, 0)],
+            self.grid[(0, self.grid.height - 1)],
+            self.grid[(self.grid.width - 1, 0)],
+            self.grid[(self.grid.width - 1, self.grid.height - 1)],
             # self.grid[(0, self.grid.height // 2)],
             # self.grid[(self.grid.width - 1, self.grid.height // 2)],
             # self.grid[(self.grid.width // 3, self.grid.height // 2)],
