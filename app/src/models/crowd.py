@@ -1,8 +1,13 @@
 import mesa
+from mesa import DataCollector
 from mesa.discrete_space import CellAgent, OrthogonalMooreGrid
 from typing import Literal
 
 from src.config import Configuration
+
+def compute_total_agents(model):
+    return model.schedule.get_agent_count()
+
 
 class CrowdAgent(CellAgent):
     """And agent that moves in a crowd following simple rules."""
@@ -38,7 +43,13 @@ class CrowdModel(mesa.Model):
         self.n_agents = CONFIG.n_agents
         self.agent_types_ratios = CONFIG.agent_types_ratios
         self._normalize_ratios()
-        
+
+        # ========== CREATE COLLECTORS ==========
+        self.datacollector = DataCollector(
+            model_reporters={"total_agents": compute_total_agents},
+            agent_reporters={},
+        )
+
         # ========== CREATE GRID ==========
         self.grid = OrthogonalMooreGrid(
             (CONFIG.width, CONFIG.height), 
@@ -46,7 +57,7 @@ class CrowdModel(mesa.Model):
             random=self.random
         )
         
-
+    
         # ========== CREATE AGENTS ==========
         agents = []
         cells = self.random.sample(self.grid.all_cells.cells, k=self.n_agents)
