@@ -6,21 +6,23 @@ from mesa.visualization.components import AgentPortrayalStyle
 def agent_portrayal(agent):
     portrayal = {
         "color": "black",
-        "size": 80,         
+        "size": 100,         
         "alpha": 1.0,
     }
 
     if agent.agent_type == "polite":
         portrayal["color"] = "tab:blue"
-        portrayal["marker"] = "o"   # Circle
-        
+        portrayal["marker"] = "o"   # Diamond
     elif agent.agent_type == "aggressive":
         portrayal["color"] = "tab:red"
         portrayal["marker"] = "v"   # Triangle
-        
     elif agent.agent_type == "slow":
+        portrayal["color"] = "#505469"
+        portrayal["marker"] = "o"   # Circle
+    elif agent.agent_type == "exit":
         portrayal["color"] = "tab:green"
         portrayal["marker"] = "s"   # Square
+        portrayal["size"] = 200
     
     return AgentPortrayalStyle(**portrayal)
 
