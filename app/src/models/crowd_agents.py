@@ -18,12 +18,12 @@ STATIC_AGENTS = [CrowdAgentEnum.EXIT, CrowdAgentEnum.WALL]
 class CrowdAgent(CellAgent):
     """And agent that moves in a crowd following simple rules."""
 
-    def __init__(self, model, agent_type: CrowdAgentEnum = CrowdAgentEnum.POLITE, track_last_steps: int = 5):
+    def __init__(self, model, agent_type: CrowdAgentEnum = CrowdAgentEnum.POLITE, track_last_steps: int = 5, exit_idx: int = None):
         super().__init__(model)
         self.agent_type = agent_type
         self.cells_moved = 0
         self.cells_moved_last_steps = [0] * track_last_steps  # For averaging speed over last steps
-
+        self.exit_idx = exit_idx
         # The speed determines the probability of moving each step
         # The higher the speed, the more likely the agent is to move
         if agent_type == CrowdAgentEnum.POLITE:
@@ -77,8 +77,15 @@ class CrowdAgent(CellAgent):
         chosen_cell = self.cell
         moved = False
         for cell in valid_neighbors:
-            for exit_idx, exit_distance in cell.exit_distances.items():
-                if exit_distance["Total"] < min_distance:
+            if self.exit_idx is None:
+                for exit_idx, exit_distance in cell.exit_distances.items():
+                    if exit_distance["Total"] < min_distance:
+                        min_distance = exit_distance["Total"]
+                        chosen_cell = cell
+                        moved = True
+            else:
+                exit_distance = cell.exit_distances.get(self.exit_idx, None)
+                if exit_distance and exit_distance["Total"] < min_distance:
                     min_distance = exit_distance["Total"]
                     chosen_cell = cell
                     moved = True

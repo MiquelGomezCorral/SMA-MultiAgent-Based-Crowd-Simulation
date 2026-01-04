@@ -58,4 +58,15 @@ basic_model_params = {
         "max": 1.0,
         "step": 0.1,
     },
+    "differentiate_exits": {
+        "type": "Checkbox",
+        "value": True,
+        "label": "Differentiate exits",
+    },
+    "path_finding_algorithm": {
+        "type": "Select",
+        "value": "A*",
+        "label": "Path Finding Algorithm:",
+        "values": ["MANHATTAN", "BFS", "A*"],
+    },
 }

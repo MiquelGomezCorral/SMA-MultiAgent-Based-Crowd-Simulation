@@ -18,6 +18,7 @@ class Configuration:
     initial_agents: int = 10
     track_last_steps: int = 5
     path_finding_algorithm: Literal["MANHATTAN", "BFS", "A*"] = "A*"
+    differentiate_exits: bool = True
 
     # BEHAVIOR RATIOS
     agent_types_ratios: dict = dataclasses.field(default_factory=lambda: {

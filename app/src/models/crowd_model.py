@@ -107,7 +107,8 @@ class CrowdModel(mesa.Model):
                 self,
                 n_type_agents,
                 agent_type = agent_type,
-                track_last_steps = self.track_last_steps
+                track_last_steps = self.track_last_steps,
+                exit_idx = np.random.randint(0, self.n_exits)
             )
             if agent_type == CrowdAgentEnum.AGGRESSIVE:
                 self.priority_agents.extend(agents)
@@ -150,7 +151,9 @@ class CrowdModel(mesa.Model):
                 if not hasattr(cell, 'exit_distances'):
                     cell.exit_distances = {}
 
-                cell.exit_distances[idx] = get_manhattan_distance(cell, exit_cell)
+                cell.exit_distances[idx] = {
+                    "Total": get_manhattan_distance(cell, exit_cell)
+                }
         elif self.path_finding_algorithm == "BFS" or self.path_finding_algorithm == "A*":
             visited, queue, queue_count = set(), [], 0
 
@@ -234,8 +237,19 @@ class CrowdModel(mesa.Model):
         )
 
 class CrowdModelWrapper(CrowdModel):
-    def __init__(self, initial_agents=50, width=30, height=30, seed=42,
-                 polite_ratio=0.5, aggressive_ratio=0.3, slow_ratio=0.2, track_last_steps=5):
+    def __init__(
+        self,
+        initial_agents=50,
+        width=30,
+        height=30,
+        seed=42,
+        polite_ratio=0.5,
+        aggressive_ratio=0.3,
+        slow_ratio=0.2,
+        track_last_steps=5,
+        path_finding_algorithm="A*",
+        differentiate_exits=True,
+    ):
         config = Configuration(
             initial_agents=initial_agents,
             width=width,
@@ -246,7 +260,9 @@ class CrowdModelWrapper(CrowdModel):
                 CrowdAgentEnum.POLITE: polite_ratio,
                 CrowdAgentEnum.AGGRESSIVE: aggressive_ratio,
                 CrowdAgentEnum.SLOW: slow_ratio
-            }
+            },
+            path_finding_algorithm=path_finding_algorithm,
+            differentiate_exits=differentiate_exits,
         )
         super().__init__(config)
 
