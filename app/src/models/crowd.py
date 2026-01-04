@@ -6,7 +6,10 @@ from mesa.discrete_space import CellAgent, OrthogonalMooreGrid
 
 
 from src.config import Configuration
-from src.data import compute_total_agents, compute_local_density, compute_evacuation_rate
+from src.data import (
+    compute_total_agents, compute_local_density, compute_evacuation_rate,
+    compute_macro_average_speed, compute_micro_average_speed
+)
 from src.utils import get_manhattan_distance
 
 # ==================================================================
@@ -20,6 +23,7 @@ class CrowdModel(mesa.Model):
         self.initial_agents = CONFIG.initial_agents
         self.current_agents = CONFIG.initial_agents
         self.agent_types_ratios = CONFIG.agent_types_ratios
+        self.track_last_steps = CONFIG.track_last_steps
         self._normalize_ratios()
 
 
@@ -39,7 +43,9 @@ class CrowdModel(mesa.Model):
             model_reporters={
                 "total_agents": compute_total_agents,
                 "local_density": compute_local_density,
-                "evacuation_rate": compute_evacuation_rate
+                "evacuation_rate": compute_evacuation_rate,
+                "macro_average_speed": compute_macro_average_speed,
+                "micro_average_speed": compute_micro_average_speed,
             },
             agent_reporters={},
         )
@@ -136,9 +142,11 @@ class CrowdModelWrapper(CrowdModel):
 class CrowdAgent(CellAgent):
     """And agent that moves in a crowd following simple rules."""
 
-    def __init__(self, model, agent_type: Literal["polite", "aggressive", "slow"] = "polite"):
+    def __init__(self, model, agent_type: Literal["polite", "aggressive", "slow"] = "polite", track_last_steps: int = 5):
         super().__init__(model)
         self.agent_type = agent_type
+        self.cells_moved = 0
+        self.cells_moved_last_steps = [0] * track_last_steps  # For averaging speed over last steps
 
         # The speed determines the probability of moving each step
         # The higher the speed, the more likely the agent is to move
@@ -151,6 +159,10 @@ class CrowdAgent(CellAgent):
 
 
     def step(self):
+        """
+        Move the agent towards the nearest exit based on its speed.
+        Agents have a probability of moving each step based on their speed.
+        """
         if self.cell is None:
             return
         
@@ -167,19 +179,28 @@ class CrowdAgent(CellAgent):
         # Move to closest exit among empty neighboring cells
         valid_neighbors = [cell for cell in self.cell.neighborhood if cell.is_empty]
         if valid_neighbors:
-            self.cell = self.choose_cell(valid_neighbors)
+            self.cell, moved = self.choose_cell(valid_neighbors)
+            self.cells_moved += int(moved)
+            # Rotate the last steps list to keep only the last 5 steps
+            self.cells_moved_last_steps.pop(0)
+            self.cells_moved_last_steps.append(int(moved))
 
     def choose_cell(self, valid_neighbors):
+        """
+        Choose the neighboring cell that is closest to any exit.
+        :param valid_neighbors: List of neighboring cells that are valid for movement
+        """
         min_distance = min(self.cell.exit_distances.values())
         chosen_cell = self.cell
-
+        moved = False
         for cell in valid_neighbors:
             for exit_idx, exit_distance in cell.exit_distances.items():
                 if exit_distance < min_distance:
                     min_distance = exit_distance
                     chosen_cell = cell
+                    moved = True
 
-        return chosen_cell
+        return chosen_cell, moved
     
     
     def compute_local_density(self, proportion: bool = False):

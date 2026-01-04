@@ -15,6 +15,8 @@ def create_page(initial_model, model_params):
     total_agents_plot = make_plot_component("total_agents")
     local_density_plot = make_plot_component("local_density")
     evacuation_rate_plot = make_plot_component("evacuation_rate")
+    macro_average_speed_plot = make_plot_component("macro_average_speed")
+    micro_average_speed_plot = make_plot_component("micro_average_speed")
 
 
     page = SolaraViz(
@@ -24,7 +26,9 @@ def create_page(initial_model, model_params):
             simulation_stats,
             total_agents_plot,
             local_density_plot,
-            evacuation_rate_plot
+            evacuation_rate_plot,
+            macro_average_speed_plot,
+            micro_average_speed_plot,
         ],
         model_params=model_params,
         name="Crowd Model",
@@ -72,15 +76,21 @@ def simulation_stats(model):
     last_density = model.datacollector.model_vars["local_density"][-1]
     last_count = model.datacollector.model_vars["total_agents"][-1]
     evacuation_rate = model.datacollector.model_vars["evacuation_rate"][-1]
+    macro_average_speed = model.datacollector.model_vars["macro_average_speed"][-1]
+    micro_average_speed = model.datacollector.model_vars["micro_average_speed"][-1]
 
     
     # ========== formatting the text ==========
     text_content = f"""
-    # Simulation Status
-    - **Step:** `          {step}`
-    - **Active Agents:** `{last_count}`
-    - **Local Density:** `{last_density:.2f}`
-    - **Evacuation Rate:** `{evacuation_rate:.2f}`
+    ### Simulation Status
+    | Metric | Value |
+    | :--- | ---: |
+    | **Step** | {step} |
+    | **Active Agents** | {last_count} |
+    | **Local Density** | {last_density:.2f} |
+    | **Evacuation Rate** | {evacuation_rate:.2f} |
+    | **Macro Avg Speed** | {macro_average_speed:.2f} |
+    | **Micro Avg Speed** | {micro_average_speed:.2f} |
     """
     
     if not model.running:

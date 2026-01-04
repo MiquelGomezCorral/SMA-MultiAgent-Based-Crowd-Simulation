@@ -17,6 +17,7 @@ class Configuration:
     width:    int = 10
     height:   int = 10
     initial_agents: int = 10
+    track_last_steps: int = 5
 
     # BEHAVIOR RATIOS
     agent_types_ratios: dict = dataclasses.field(default_factory=lambda: {

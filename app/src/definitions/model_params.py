@@ -26,6 +26,14 @@ basic_model_params = {
         "max": 50,
         "step": 1,
     },
+    "track_last_steps": {
+        "type": "SliderInt",
+        "value": 5,
+        "label": "Track last steps for speed:",
+        "min": 1,
+        "max": 20,
+        "step": 1,
+    },
     "polite_ratio": {
         "type": "SliderFloat",
         "value": 0.5,
