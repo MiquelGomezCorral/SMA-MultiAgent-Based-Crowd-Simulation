@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 from mesa.visualization import SolaraViz, SpaceRenderer, make_plot_component
 from mesa.visualization.components import AgentPortrayalStyle
 
-from .crowd_agents import CrowdAgentEnum
+from .crowd_agents import CrowdAgentEnum, STATIC_AGENTS
+from src.utils import get_varied_color
 # ==================================================================
 #                           VISUALIZATION
 # ==================================================================
@@ -46,7 +47,6 @@ def agent_portrayal(agent):
         "size": 100,         
         "alpha": 1.0,
     }
-
     if agent.agent_type == CrowdAgentEnum.POLITE:
         portrayal["color"] = "tab:blue"
         portrayal["marker"] = "d"   # Diamond
@@ -64,6 +64,14 @@ def agent_portrayal(agent):
         portrayal["color"] = "tab:gray"
         portrayal["marker"] = "s"   # Square
         portrayal["size"] = 200
+
+    # Agents assigned to specific exits get colored accordingly
+    if hasattr(agent, "exit_idx") and agent.exit_idx is not None:  
+        portrayal["color"] = f"C{agent.exit_idx}"
+
+    # Use unique_id so every agent looks distinct but keeps their color
+    if agent.agent_type not in STATIC_AGENTS:
+        portrayal["color"] = get_varied_color(portrayal["color"], agent.unique_id)
     
     return AgentPortrayalStyle(**portrayal)
 
@@ -131,3 +139,6 @@ def heatmap_component(model):
     ax.set_yticks([])
 
     return solara.FigureMatplotlib(fig)
+
+
+

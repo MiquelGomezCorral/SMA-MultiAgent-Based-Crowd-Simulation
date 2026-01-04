@@ -133,9 +133,10 @@ class CrowdAgent(CellAgent):
 class CrowdExit(CellAgent):
     """An exit cell where agents can leave the simulation."""
 
-    def __init__(self, model):
+    def __init__(self, model, exit_idx: int):
         super().__init__(model)
         self.agent_type = CrowdAgentEnum.EXIT
+        self.exit_idx = exit_idx
 
     def step(self):
         pass

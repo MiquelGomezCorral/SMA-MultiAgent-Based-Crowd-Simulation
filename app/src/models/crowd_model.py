@@ -137,14 +137,14 @@ class CrowdModel(mesa.Model):
             self.grid[(self.grid.width - 1, 0)],
             self.grid[(self.grid.width - 1, self.grid.height - 1)],
             # self.grid[(0, self.grid.height // 2)],
-            # self.grid[(self.grid.width - 1, self.grid.height // 2)],
+            self.grid[(self.grid.width - 1, self.grid.height // 2)],
             # self.grid[(self.grid.width // 3, self.grid.height // 2)],
-            # self.grid[(2 * self.grid.width // 3, self.grid.height // 2)],
+            self.grid[(2 * self.grid.width // 3, self.grid.height // 2)],
         ]
         self.n_exits = len(self.exit_cells)
 
         for idx, cell in enumerate(self.exit_cells):
-            exit_agent = CrowdExit(self)
+            exit_agent = CrowdExit(self, exit_idx=idx)
             exit_agent.cell = cell
             self._compute_exit_distance(cell, idx)
 
