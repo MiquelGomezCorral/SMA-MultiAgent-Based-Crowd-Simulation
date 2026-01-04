@@ -3,4 +3,4 @@
 General app configuration with definitions of variables and values.
 """
 
-from .config import Configuration, args_to_config  # noqa: F401
+from .config import Configuration  # noqa: F401
