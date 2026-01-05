@@ -14,7 +14,8 @@ from src.data import (
 )
 from src.utils import get_manhattan_distance, get_l2_distance
 
-from .crowd_agents import CrowdAgent, CrowdExit, CrowdAgentEnum, CrowdWall, STATIC_AGENTS
+from src.definitions import CrowdAgentEnum, STATIC_AGENTS
+from .crowd_agents import CrowdAgent, CrowdExit, CrowdWall
 
 # ==================================================================
 #                               MODEL

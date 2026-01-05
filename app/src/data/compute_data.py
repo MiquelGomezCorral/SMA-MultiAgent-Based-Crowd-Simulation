@@ -1,7 +1,5 @@
 """Functions that compute data from the model."""
 
-from src.utils import compute_macro_average_speed
-
 def compute_local_density(model, proportion: bool = False):
     """
     Compute the average local density of agents in the model.
@@ -25,9 +23,7 @@ def compute_evacuation_rate(model):
 
 def compute_macro_average_speed(model):
     """Compute the average speed of agents in the model for the whole simulation."""
-    real_agents = model.get_moving_agents()
-    return compute_macro_average_speed(real_agents, model.steps)
-
+    return compute_macro_average_speed_by_type(model, "Total")
 
 def compute_micro_average_speed(model):
     """Compute the average blocks agents move per tick (last N steps)."""
@@ -56,5 +52,9 @@ def compute_macro_average_speed_by_type(model, agent_type):
     """Compute the macro average speed for a specific agent type."""
     agents_of_type = model.get_agents_by_type(agent_type)
     
-    return compute_macro_average_speed(agents_of_type, model.steps)
+    if model.steps == 0 or len(agents_of_type) == 0:
+        return 0
+    
+    total_cells_moved = sum(agent.cells_moved for agent in agents_of_type)
+    return total_cells_moved / (model.steps * len(agents_of_type))
 

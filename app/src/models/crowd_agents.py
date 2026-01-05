@@ -2,19 +2,10 @@
 
 import numpy as np
 from mesa.discrete_space import CellAgent
-from enum import Enum
+from src.definitions import CrowdAgentEnum, STATIC_AGENTS, CROWD_AGENT_STATS
 # ==================================================================
 #                               AGENT
 # ==================================================================
-class CrowdAgentEnum(str, Enum):
-    POLITE = "polite"
-    AGGRESSIVE = "aggressive"
-    SLOW = "slow"
-    EXIT = "exit"
-    WALL = "wall"
-
-STATIC_AGENTS = [CrowdAgentEnum.EXIT, CrowdAgentEnum.WALL]
-
 class CrowdAgent(CellAgent):
     """And agent that moves in a crowd following simple rules."""
 
@@ -29,13 +20,8 @@ class CrowdAgent(CellAgent):
         self.exit_idx = model.random.randint(0, number_of_exits - 1) if number_of_exits is not None else None
         # The speed determines the probability of moving each step
         # The higher the speed, the more likely the agent is to move
-        if agent_type == CrowdAgentEnum.POLITE:
-            self.speed = np.random.uniform(0.65, 1.0)
-        elif agent_type == CrowdAgentEnum.AGGRESSIVE:
-            self.speed = np.random.uniform(0.8, 1.0)
-        elif agent_type == CrowdAgentEnum.SLOW:
-            self.speed = np.random.uniform(0.5, 0.65)
-
+        self.speed = np.random.uniform(*CROWD_AGENT_STATS[agent_type]["speed_range"])
+        self.crowd_slowdown_factor = CROWD_AGENT_STATS[agent_type]["crowd_slowdown_factor"]
 
     def step(self):
         """

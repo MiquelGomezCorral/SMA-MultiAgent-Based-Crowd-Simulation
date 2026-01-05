@@ -3,56 +3,12 @@
 import numpy as np
 import solara
 import matplotlib.pyplot as plt
-from mesa.visualization import SolaraViz, SpaceRenderer, make_plot_component
+from mesa.visualization import SolaraViz, SpaceRenderer
 from mesa.visualization.components import AgentPortrayalStyle
-import textwrap
-from .crowd_agents import CrowdAgentEnum, STATIC_AGENTS
+
+from src.definitions import CrowdAgentEnum, STATIC_AGENTS, CROWD_AGENT_STATS, AGENT_TYPE_COLORS
+from src.data import compute_evacuation_rate_by_type, compute_macro_average_speed_by_type
 from src.utils import get_varied_color
-
-# Centralized color mapping for agent types
-AGENT_TYPE_COLORS = {
-    # Plot metrics
-    "total_agents": "black",
-    "polite_agents": "tab:blue",
-    "aggressive_agents": "tab:red",
-    "slow_agents": "#179665",
-    # Per-type evacuation rates
-    "local_density": "tab:blue",
-    "evacuation_rate": "black",
-    "polite_evacuation_rate": "tab:blue",
-    "aggressive_evacuation_rate": "tab:red",
-    "slow_evacuation_rate": "#179665",
-    # Per-type macro speeds
-    "micro_average_speed": "tab:orange",
-    "macro_average_speed": "black",
-    "polite_macro_speed": "tab:blue",
-    "aggressive_macro_speed": "tab:red",
-    "slow_macro_speed": "#179665",
-    # Agent types for portrayal
-    CrowdAgentEnum.POLITE: "tab:blue",
-    CrowdAgentEnum.AGGRESSIVE: "tab:red",
-    CrowdAgentEnum.SLOW: "#179665",
-    CrowdAgentEnum.EXIT: "tab:green",
-    CrowdAgentEnum.WALL: "tab:gray",
-}
-
-# Agent markers for different types
-AGENT_TYPE_MARKERS = {
-    CrowdAgentEnum.POLITE: "d",      # Diamond
-    CrowdAgentEnum.AGGRESSIVE: "v",  # Triangle
-    CrowdAgentEnum.SLOW: "o",        # Circle
-    CrowdAgentEnum.EXIT: "s",        # Square
-    CrowdAgentEnum.WALL: "s",        # Square
-}
-
-# Agent sizes for different types
-AGENT_TYPE_SIZES = {
-    CrowdAgentEnum.POLITE: 100,
-    CrowdAgentEnum.AGGRESSIVE: 100,
-    CrowdAgentEnum.SLOW: 100,
-    CrowdAgentEnum.EXIT: 200,
-    CrowdAgentEnum.WALL: 200,
-}
 
 # ==================================================================
 #                           VISUALIZATION
@@ -142,10 +98,13 @@ def make_custom_plot(model, metrics, title):
 
 def agent_portrayal(agent):
     """Generate agent portrayal using centralized configuration."""
+    # Use CROWD_AGENT_STATS directly for consistency
+    agent_stats = CROWD_AGENT_STATS.get(agent.agent_type, {})
+    
     portrayal = {
-        "color": AGENT_TYPE_COLORS.get(agent.agent_type, "black"),
-        "marker": AGENT_TYPE_MARKERS.get(agent.agent_type, "o"),
-        "size": AGENT_TYPE_SIZES.get(agent.agent_type, 100),
+        "color": agent_stats.get("color", "black"),
+        "marker": agent_stats.get("marker", "o"),
+        "size": agent_stats.get("size", 100),
         "alpha": 1.0,
     }
 
@@ -182,24 +141,20 @@ def simulation_stats(model):
 
     
     # ========== formatting the text ==========
-    active_agents_text = "\n".join([
-        f"| **Active {agent_type.capitalize()} Agents** | {model.compute_agents_by_type(agent_type)} | {model.initial_agents[agent_type]} | --- | --- |"
-        for agent_type in ["Total"] + list(CrowdAgentEnum)
-        if agent_type not in STATIC_AGENTS
-        or agent_type == "Total"
-    ])
-    # | **Active Agents** | {last_count} | {model.initial_agents} | --- |
+    active_agent_types = [agent_type for agent_type in list(CrowdAgentEnum) if agent_type not in STATIC_AGENTS]
+    active_agent_types_display = [agent_type.value.capitalize() for agent_type in active_agent_types]
+    empty_line_separator = "|".join(["---"] * len(active_agent_types))
     
      # Create the markdown text
     text_content = f"""### Simulation Status
-| Metric | Current | Max | Avg |
-| :--- | --- | --- | ---: |
-| **Step** | {step} | --- | --- |
-{active_agents_text}
-| **Local Density** | {last_density:.2f} | {model.max_density:.2f} | {avg_density:.2f} |
-| **Evacuation Rate** | --- | {model.max_evacuation_rate:.2f} | {evacuation_rate:.2f} |
-| **Macro Avg Speed** | --- | {model.max_macro_average_speed:.2f} | {macro_average_speed:.2f} |
-| **Micro Avg Speed** | {micro_average_speed:.2f} | {model.max_micro_average_speed:.2f} | --- |
+| Metric | Current | Max | Avg | {"|".join(active_agent_types_display)} |
+| :--- | --- | --- | --- | {empty_line_separator} |
+| **Step** | {step} | --- | --- | {empty_line_separator} |
+| **Active Agents** | {last_count} | {model.initial_agents["Total"]} | --- | {"|".join(str(get_metric_value(model, f"{agent_type.value}_agents")) for agent_type in active_agent_types)} |
+| **Local Density** | {last_density:.2f} | {model.max_density:.2f} | {avg_density:.2f} | {empty_line_separator} |
+| **Evacuation Rate** | --- | {model.max_evacuation_rate:.2f} | {evacuation_rate:.2f} | {"|".join(f"{get_metric_value(model, f'{agent_type.value}_evacuation_rate'):.2f}" for agent_type in active_agent_types)} |
+| **Macro Avg Speed** | --- | {model.max_macro_average_speed:.2f} | {macro_average_speed:.2f} | {"|".join(f"{get_metric_value(model, f'{agent_type.value}_macro_speed'):.2f}" for agent_type in active_agent_types)} |
+| **Micro Avg Speed** | {micro_average_speed:.2f} | {model.max_micro_average_speed:.2f} | --- | {empty_line_separator} |
 """
     if not model.running:
         text_content += f"\n**FINISHED!** Total time: `{step}` steps."
