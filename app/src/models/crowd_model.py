@@ -121,10 +121,10 @@ class CrowdModel(mesa.Model):
 
     def _create_walls(self):
         """Create wall agents around the grid perimeter."""
-        for xx in range(-1, 1):
+        for xx in range(-2, 2):
             x = xx + self.grid.width // 2 
-            for y in range(3, self.grid.height - 3):
-                if y == self.grid.height // 2 or y == (self.grid.height // 2) - 1 or y == (self.grid.height // 2) + 1:
+            for y in range(4, self.grid.height - 4):
+                if y == self.grid.height // 2 or y == (self.grid.height // 2) - 1 or y == (self.grid.height // 2) + 1 or y == (self.grid.height // 2) - 2 or y == (self.grid.height // 2) + 2:
                     continue  # Leave exit gap
                 wall_agent = CrowdWall(self)
                 wall_agent.cell = self.grid[(x, y)]

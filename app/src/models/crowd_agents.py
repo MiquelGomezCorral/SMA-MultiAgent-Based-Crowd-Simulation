@@ -97,11 +97,10 @@ class CrowdAgent(CellAgent):
         current_min_distance = get_cell_min_distance(self.cell)
         best_min_distance = get_cell_min_distance(best_cell)
         
-        if best_min_distance < current_min_distance:
+        if best_min_distance <= current_min_distance:
             return best_cell, True
         
         return self.cell, False
-    
     
     def compute_local_density(self, proportion: bool = False):
         """
