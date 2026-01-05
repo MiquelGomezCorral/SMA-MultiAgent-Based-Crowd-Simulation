@@ -9,7 +9,8 @@ from mesa.discrete_space import OrthogonalMooreGrid
 from src.config import Configuration
 from src.data import (
     compute_local_density, compute_evacuation_rate,
-    compute_macro_average_speed, compute_micro_average_speed
+    compute_macro_average_speed, compute_micro_average_speed,
+    compute_evacuation_rate_by_type, compute_macro_average_speed_by_type
 )
 from src.utils import get_manhattan_distance, get_l2_distance
 
@@ -62,6 +63,15 @@ class CrowdModel(mesa.Model):
                 "evacuation_rate": compute_evacuation_rate,
                 "macro_average_speed": compute_macro_average_speed,
                 "micro_average_speed": compute_micro_average_speed,
+                
+                # Per-type metrics
+                "polite_evacuation_rate": lambda m: compute_evacuation_rate_by_type(m, CrowdAgentEnum.POLITE),
+                "aggressive_evacuation_rate": lambda m: compute_evacuation_rate_by_type(m, CrowdAgentEnum.AGGRESSIVE),
+                "slow_evacuation_rate": lambda m: compute_evacuation_rate_by_type(m, CrowdAgentEnum.SLOW),
+                
+                "polite_macro_speed": lambda m: compute_macro_average_speed_by_type(m, CrowdAgentEnum.POLITE),
+                "aggressive_macro_speed": lambda m: compute_macro_average_speed_by_type(m, CrowdAgentEnum.AGGRESSIVE),
+                "slow_macro_speed": lambda m: compute_macro_average_speed_by_type(m, CrowdAgentEnum.SLOW),
             },
             agent_reporters={},
         )
@@ -97,15 +107,21 @@ class CrowdModel(mesa.Model):
             if agent.agent_type not in self.STATIC_AGENTS
         ]
     
-    def compute_agents_by_type(self, agent_type: CrowdAgentEnum):
-        """Compute the number of agents of a specific type."""
-        return len([
+    def get_agents_by_type(self, agent_type: CrowdAgentEnum):
+        """Get all agents of a specific type."""
+        if agent_type == "Total":
+            return self.get_moving_agents()
+        
+        return [
             agent for agent in self.agents 
             if hasattr(agent, 'agent_type') 
             and agent.agent_type == agent_type
-        ])
+        ]
 
-
+    def compute_agents_by_type(self, agent_type: CrowdAgentEnum):
+        """Compute the number of agents of a specific type."""
+        return len(self.get_agents_by_type(agent_type))
+    
     def _update_agent_count(self):
         """Update the current number of active agents."""
         self.current_agents = len(self.get_moving_agents())
@@ -238,12 +254,14 @@ class CrowdModel(mesa.Model):
             raise ValueError(f"Unknown path finding algorithm: {self.path_finding_algorithm}")
                 
     def _initialize_max_values(self):
+        """Initialize the maximum recorded values for various metrics."""
         self.max_density = self.datacollector.model_vars["local_density"][-1]
         self.max_evacuation_rate = self.datacollector.model_vars["evacuation_rate"][-1]
         self.max_macro_average_speed = self.datacollector.model_vars["macro_average_speed"][-1]
         self.max_micro_average_speed = self.datacollector.model_vars["micro_average_speed"][-1]
 
     def _update_max_values(self):
+        """Update the maximum recorded values for various metrics."""
         self.max_density = (
             self.datacollector.model_vars["local_density"][-1]
             if self.datacollector.model_vars["local_density"][-1] > self.max_density 

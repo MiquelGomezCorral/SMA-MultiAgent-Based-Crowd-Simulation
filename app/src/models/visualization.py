@@ -16,6 +16,18 @@ AGENT_TYPE_COLORS = {
     "polite_agents": "tab:blue",
     "aggressive_agents": "tab:red",
     "slow_agents": "#179665",
+    # Per-type evacuation rates
+    "local_density": "tab:blue",
+    "evacuation_rate": "black",
+    "polite_evacuation_rate": "tab:blue",
+    "aggressive_evacuation_rate": "tab:red",
+    "slow_evacuation_rate": "#179665",
+    # Per-type macro speeds
+    "micro_average_speed": "tab:orange",
+    "macro_average_speed": "black",
+    "polite_macro_speed": "tab:blue",
+    "aggressive_macro_speed": "tab:red",
+    "slow_macro_speed": "#179665",
     # Agent types for portrayal
     CrowdAgentEnum.POLITE: "tab:blue",
     CrowdAgentEnum.AGGRESSIVE: "tab:red",
@@ -41,16 +53,67 @@ AGENT_TYPE_SIZES = {
     CrowdAgentEnum.EXIT: 200,
     CrowdAgentEnum.WALL: 200,
 }
+
 # ==================================================================
 #                           VISUALIZATION
 # ==================================================================
+def create_page(initial_model, model_params):
+    # Create renderer with the initial model
+    renderer = SpaceRenderer(model=initial_model, backend="matplotlib").render(
+        agent_portrayal=agent_portrayal
+    )
 
+    page = SolaraViz(
+        initial_model,  
+        renderer,
+        components=[
+            simulation_stats,
+            agent_count_plot,
+            evacuation_rate_plot,
+            macro_speed_plot,
+            micro_density_plot,
+            heatmap_component,
+        ],
+        model_params=model_params,
+        name="Crowd Model",
+    )
+    return page
+
+
+
+# ==================================================================
+#                       VISUALIZATION HELPERS
+# ==================================================================
 def agent_count_plot(model):
     """Custom plot for agent counts with specific colors."""
     return make_custom_plot(
         model, 
         ["total_agents", "polite_agents", "aggressive_agents", "slow_agents"],
         "Agent Counts"
+    )
+
+def evacuation_rate_plot(model):
+    """Custom plot for evacuation rates by agent type."""
+    return make_custom_plot(
+        model,
+        ["evacuation_rate", "polite_evacuation_rate", "aggressive_evacuation_rate", "slow_evacuation_rate"],
+        "Evacuation Rate by Agent Type"
+    )
+
+def macro_speed_plot(model):
+    """Custom plot for macro average speed by agent type."""
+    return make_custom_plot(
+        model,
+        ["macro_average_speed", "polite_macro_speed", "aggressive_macro_speed", "slow_macro_speed"],
+        "Macro Average Speed by Agent Type"
+    )
+
+def micro_density_plot(model):
+    """Custom plot for micro density."""
+    return make_custom_plot(
+        model,
+        ["local_density", "micro_average_speed"],
+        "Micro Density Over Time"
     )
 
 def make_custom_plot(model, metrics, title):
@@ -71,31 +134,6 @@ def make_custom_plot(model, metrics, title):
     ax.legend()
     
     return solara.FigureMatplotlib(fig)
-
-def create_page(initial_model, model_params):
-    # Create renderer with the initial model
-    renderer = SpaceRenderer(model=initial_model, backend="matplotlib").render(
-        agent_portrayal=agent_portrayal
-    )
-    total_agents_plot = agent_count_plot
-    rates_plot = make_plot_component(["local_density", "evacuation_rate"])
-    average_speed_plot = make_plot_component(["macro_average_speed", "micro_average_speed"])
-
-
-    page = SolaraViz(
-        initial_model,  
-        renderer,
-        components=[
-            simulation_stats,
-            total_agents_plot,
-            rates_plot,
-            average_speed_plot,
-            heatmap_component,
-        ],
-        model_params=model_params,
-        name="Crowd Model",
-    )
-    return page
 
 
 # ==================================================================

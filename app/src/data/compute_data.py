@@ -20,20 +20,13 @@ def compute_local_density(model, proportion: bool = False):
 
 def compute_evacuation_rate(model):
     """Compute the evacuation rate of agents in the model."""
-    evacuated_agents = model.initial_agents["Total"] - model.current_agents
-    return evacuated_agents / model.steps if model.steps > 0 else 0
+    return compute_evacuation_rate_by_type(model, "Total")
 
 def compute_macro_average_speed(model):
     """Compute the average speed of agents in the model for the whole simulation."""
     real_agents = model.get_moving_agents()
-    if len(real_agents) == 0 or model.steps == 0:
-        return 0
-    
-    total_cells_moved = sum(
-        agent.cells_moved 
-        for agent in real_agents
-    )
-    return total_cells_moved / (model.steps * len(real_agents)) 
+    return _compute_macro_average_speed(real_agents, model.steps)
+
 
 def compute_micro_average_speed(model):
     """Compute the average blocks agents move per tick (last N steps)."""
@@ -46,3 +39,28 @@ def compute_micro_average_speed(model):
         for agent in real_agents
     )
     return total_cells_moved / (model.track_last_steps * len(real_agents))
+
+def compute_evacuation_rate_by_type(model, agent_type):
+    """Compute the evacuation rate for a specific agent type."""
+    
+    initial_count = model.initial_agents.get(agent_type, 0)
+    if initial_count == 0 or model.steps == 0:
+        return 0
+    
+    current_count = model.compute_agents_by_type(agent_type)
+    evacuated_agents = initial_count - current_count
+    return evacuated_agents / model.steps
+
+def compute_macro_average_speed_by_type(model, agent_type):
+    """Compute the macro average speed for a specific agent type."""
+    agents_of_type = model.get_agents_by_type(agent_type)
+    
+    return _compute_macro_average_speed(agents_of_type, model.steps)
+
+
+def _compute_macro_average_speed(agents, steps):
+    if steps == 0 or len(agents) == 0:
+        return 0
+    
+    total_cells_moved = sum(agent.cells_moved for agent in agents)
+    return total_cells_moved / (steps * len(agents))
