@@ -20,6 +20,9 @@ class CrowdAgent(CellAgent):
 
     def __init__(self, model, agent_type: CrowdAgentEnum = CrowdAgentEnum.POLITE, track_last_steps: int = 5, number_of_exits: int = None):
         super().__init__(model)
+        if track_last_steps <= 0:
+            raise ValueError("track_last_steps must be a positive integer.")
+        
         self.agent_type = agent_type
         self.cells_moved = 0
         self.cells_moved_last_steps = [0] * track_last_steps  # For averaging speed over last steps
@@ -60,17 +63,18 @@ class CrowdAgent(CellAgent):
     
     def move(self):
         """Move to closest exit among empty neighboring cells"""
-        # Skip movement based on speed probability
-        if self.random.random() > self.speed:
-            return 
+        moved = False
         
-        valid_neighbors = [cell for cell in self.cell.neighborhood if cell.is_empty]
-        if valid_neighbors:
-            self.cell, moved = self.choose_cell(valid_neighbors)
-            self.cells_moved += int(moved)
-            # Rotate the last steps list to keep only the last 5 steps
-            self.cells_moved_last_steps.pop(0)
-            self.cells_moved_last_steps.append(int(moved))
+        # Skip movement based on speed probability
+        if self.random.random() <= self.speed:
+            valid_neighbors = [cell for cell in self.cell.neighborhood if cell.is_empty]
+            if valid_neighbors:
+                self.cell, moved = self.choose_cell(valid_neighbors)
+                self.cells_moved += int(moved)
+        
+        # Always update tracking for this step (moved or not)
+        self.cells_moved_last_steps.pop(0)
+        self.cells_moved_last_steps.append(int(moved))
 
     def choose_cell(self, valid_neighbors):
         """

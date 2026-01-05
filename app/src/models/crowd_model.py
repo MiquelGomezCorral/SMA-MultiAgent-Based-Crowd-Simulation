@@ -240,6 +240,13 @@ class CrowdModel(mesa.Model):
             else self.max_micro_average_speed
         )
 
+    def get_moving_agents(self):
+        """Get all agents that can move (i.e., not static)."""
+        return [
+            agent for agent in self.agents 
+            if agent.agent_type not in self.STATIC_AGENTS
+        ]
+
 class CrowdModelWrapper(CrowdModel):
     def __init__(
         self,

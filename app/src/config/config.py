@@ -20,6 +20,10 @@ class Configuration:
     path_finding_algorithm: Literal["MANHATTAN", "BFS", "A*"] = "A*"
     differentiate_exits: bool = True
 
+    n_experiments: int = 1000
+
+    show_page: bool = True
+
     # BEHAVIOR RATIOS
     agent_types_ratios: dict = dataclasses.field(default_factory=lambda: {
         "polite": 0.7,
