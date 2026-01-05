@@ -8,7 +8,7 @@ from mesa.discrete_space import OrthogonalMooreGrid
 
 from src.config import Configuration
 from src.data import (
-    compute_total_agents, compute_local_density, compute_evacuation_rate,
+    compute_local_density, compute_evacuation_rate,
     compute_macro_average_speed, compute_micro_average_speed
 )
 from src.utils import get_manhattan_distance, get_l2_distance
@@ -48,7 +48,14 @@ class CrowdModel(mesa.Model):
         # ========== CREATE COLLECTORS ==========
         self.datacollector = DataCollector(
             model_reporters={
-                "total_agents": compute_total_agents,
+                "total_agents": lambda m: m.current_agents,
+                "polite_agents": lambda m: 
+                    m.compute_agents_by_type(CrowdAgentEnum.POLITE),
+                "aggressive_agents": lambda m: 
+                    m.compute_agents_by_type(CrowdAgentEnum.AGGRESSIVE),
+                "slow_agents": lambda m: 
+                    m.compute_agents_by_type(CrowdAgentEnum.SLOW),
+
                 "local_density": compute_local_density,
                 "evacuation_rate": compute_evacuation_rate,
                 "macro_average_speed": compute_macro_average_speed,
@@ -81,12 +88,25 @@ class CrowdModel(mesa.Model):
         if len(active_agents) == 0:
             self.running = False
 
+    def get_moving_agents(self):
+        """Get all agents that can move (i.e., not static)."""
+        return [
+            agent for agent in self.agents 
+            if agent.agent_type not in self.STATIC_AGENTS
+        ]
+    
+    def compute_agents_by_type(self, agent_type: CrowdAgentEnum):
+        """Compute the number of agents of a specific type."""
+        return len([
+            agent for agent in self.agents 
+            if hasattr(agent, 'agent_type') 
+            and agent.agent_type == agent_type
+        ])
+
+
     def _update_agent_count(self):
         """Update the current number of active agents."""
-        self.current_agents = len([
-            a for a in self.agents 
-            if a.agent_type not in ["exit", "wall"]
-        ])
+        self.current_agents = len(self.get_moving_agents())
 
     def _normalize_ratios(self):
         total = sum(self.agent_types_ratios.values())
@@ -240,12 +260,6 @@ class CrowdModel(mesa.Model):
             else self.max_micro_average_speed
         )
 
-    def get_moving_agents(self):
-        """Get all agents that can move (i.e., not static)."""
-        return [
-            agent for agent in self.agents 
-            if agent.agent_type not in self.STATIC_AGENTS
-        ]
 
 class CrowdModelWrapper(CrowdModel):
     def __init__(

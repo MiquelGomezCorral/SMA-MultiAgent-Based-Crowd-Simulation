@@ -1,8 +1,5 @@
 """Functions that compute data from the model."""
 
-def compute_total_agents(model):
-    """Compute the total number of agents in the model."""
-    return model.current_agents
 
 def compute_local_density(model, proportion: bool = False):
     """
