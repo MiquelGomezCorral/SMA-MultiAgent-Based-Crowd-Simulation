@@ -5,8 +5,7 @@ import solara
 import matplotlib.pyplot as plt
 from mesa.visualization import SolaraViz, SpaceRenderer, make_plot_component
 from mesa.visualization.components import AgentPortrayalStyle
-import pandas as pd
-
+import textwrap
 from .crowd_agents import CrowdAgentEnum, STATIC_AGENTS
 from src.utils import get_varied_color
 
@@ -145,20 +144,27 @@ def simulation_stats(model):
 
     
     # ========== formatting the text ==========
-    text_content = f"""
-    ### Simulation Status
-    | Metric | Current | Max | Avg |
-    | :--- | --- | --- | ---: |
-    | **Step** | {step} | --- | --- |
-    | **Active Agents** | {last_count} | {model.initial_agents} | --- |
-    | **Local Density** | {last_density:.2f} | {model.max_density:.2f} | {avg_density:.2f} |
-    | **Evacuation Rate** | --- | {model.max_evacuation_rate:.2f} | {evacuation_rate:.2f} |
-    | **Macro Avg Speed** | --- | {model.max_macro_average_speed:.2f} | {macro_average_speed:.2f} |
-    | **Micro Avg Speed** | {micro_average_speed:.2f} | {model.max_micro_average_speed:.2f} | --- |
-    """
+    active_agents_text = "\n".join([
+        f"| **Active {agent_type.capitalize()} Agents** | {model.compute_agents_by_type(agent_type)} | {model.initial_agents[agent_type]} | --- | --- |"
+        for agent_type in ["Total"] + list(CrowdAgentEnum)
+        if agent_type not in STATIC_AGENTS
+        or agent_type == "Total"
+    ])
+    # | **Active Agents** | {last_count} | {model.initial_agents} | --- |
     
+     # Create the markdown text
+    text_content = f"""### Simulation Status
+| Metric | Current | Max | Avg |
+| :--- | --- | --- | ---: |
+| **Step** | {step} | --- | --- |
+{active_agents_text}
+| **Local Density** | {last_density:.2f} | {model.max_density:.2f} | {avg_density:.2f} |
+| **Evacuation Rate** | --- | {model.max_evacuation_rate:.2f} | {evacuation_rate:.2f} |
+| **Macro Avg Speed** | --- | {model.max_macro_average_speed:.2f} | {macro_average_speed:.2f} |
+| **Micro Avg Speed** | {micro_average_speed:.2f} | {model.max_micro_average_speed:.2f} | --- |
+"""
     if not model.running:
-        text_content += f"**FINISHED!** Total time: `{step}` steps."
+        text_content += f"\n**FINISHED!** Total time: `{step}` steps."
 
     return solara.Markdown(text_content)
 

@@ -20,7 +20,7 @@ def compute_local_density(model, proportion: bool = False):
 
 def compute_evacuation_rate(model):
     """Compute the evacuation rate of agents in the model."""
-    evacuated_agents = model.initial_agents - model.current_agents
+    evacuated_agents = model.initial_agents["Total"] - model.current_agents
     return evacuated_agents / model.steps if model.steps > 0 else 0
 
 def compute_macro_average_speed(model):

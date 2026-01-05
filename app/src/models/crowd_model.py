@@ -23,7 +23,9 @@ class CrowdModel(mesa.Model):
 
     def __init__(self, CONFIG: Configuration):
         super().__init__(seed=CONFIG.seed)
-        self.initial_agents = CONFIG.initial_agents
+        self.initial_agents = {
+            "Total": CONFIG.initial_agents
+        }
         self.current_agents = CONFIG.initial_agents
         self.agent_types_ratios = CONFIG.agent_types_ratios
         self.track_last_steps = CONFIG.track_last_steps
@@ -117,13 +119,14 @@ class CrowdModel(mesa.Model):
         """Create agents and place them randomly on the grid."""
         self.priority_agents = []
         self.other_agents = []
-        empty_cells = [c for c in self.grid.all_cells if c.is_empty]
-        if len(empty_cells) < self.initial_agents:
-            raise ValueError("Not enough empty cells to place all agents.")
-        cells = self.random.sample(empty_cells, k=self.initial_agents)
+        # =================== PROPER AGENT DISTRIBUTION ===================
+        cells = self._get_initial_cells()
         
-        for agent_type, ratio in self.agent_types_ratios.items():
-            n_type_agents = int(np.round(self.initial_agents * ratio))
+        # =================== PROPER AGENT DISTRIBUTION ===================
+        agent_counts = self._get_initial_agent_counts()
+        
+        # =================== AGENT CREATION ===================
+        for agent_type, n_type_agents in agent_counts.items():
             agents = CrowdAgent.create_agents(
                 self,
                 n_type_agents,
@@ -135,6 +138,8 @@ class CrowdModel(mesa.Model):
                 self.priority_agents.extend(agents)
             else: 
                 self.other_agents.extend(agents)
+
+            self.initial_agents[agent_type] = len(agents)
 
         for agent, cell in zip(self.priority_agents + self.other_agents, cells):
             agent.cell = cell
@@ -260,6 +265,36 @@ class CrowdModel(mesa.Model):
             else self.max_micro_average_speed
         )
 
+    def _get_initial_cells(self):
+        """Get a list of initial cells to place agents."""
+        empty_cells = [c for c in self.grid.all_cells if c.is_empty]
+        if len(empty_cells) < self.initial_agents["Total"]:
+            raise ValueError("Not enough empty cells to place all agents.")
+        return self.random.sample(empty_cells, k=self.initial_agents["Total"])
+    
+    def _get_initial_agent_counts(self):
+        """Get the initial number of agents per type based on ratios."""
+        agent_counts = {}
+        
+        # Calculate base counts (floor) and remainders
+        exact_counts = {agent_type: self.initial_agents["Total"] * ratio 
+                       for agent_type, ratio in self.agent_types_ratios.items()}
+        base_counts = {agent_type: int(count) 
+                      for agent_type, count in exact_counts.items()}
+        remainders = {agent_type: exact_counts[agent_type] - base_counts[agent_type] 
+                     for agent_type in exact_counts}
+        
+        # Distribute remaining agents to types with largest remainders
+        remaining = self.initial_agents["Total"] - sum(base_counts.values())
+        sorted_types = sorted(remainders.keys(), key=lambda k: remainders[k], reverse=True)
+        
+        for agent_type in sorted_types:
+            agent_counts[agent_type] = base_counts[agent_type]
+            if remaining > 0:
+                agent_counts[agent_type] += 1
+                remaining -= 1
+
+        return agent_counts
 
 class CrowdModelWrapper(CrowdModel):
     def __init__(

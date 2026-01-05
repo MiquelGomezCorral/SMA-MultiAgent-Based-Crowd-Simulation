@@ -2,11 +2,11 @@
 
 import numpy as np
 from mesa.discrete_space import CellAgent
-
+from enum import Enum
 # ==================================================================
 #                               AGENT
 # ==================================================================
-class CrowdAgentEnum(str):
+class CrowdAgentEnum(str, Enum):
     POLITE = "polite"
     AGGRESSIVE = "aggressive"
     SLOW = "slow"
