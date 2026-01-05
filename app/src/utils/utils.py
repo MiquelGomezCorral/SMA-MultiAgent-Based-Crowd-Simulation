@@ -47,3 +47,12 @@ def get_varied_color(base_color, agent_id, noise_level=0.25):
     
     # 4. Convert back to hex string for consistency with matplotlib
     return mcolors.to_hex(new_rgb)
+
+
+def compute_macro_average_speed(agents, steps):
+    """Compute the macro average speed for a list of agents over a number of steps."""
+    if steps == 0 or len(agents) == 0:
+        return 0
+    
+    total_cells_moved = sum(agent.cells_moved for agent in agents)
+    return total_cells_moved / (steps * len(agents))
