@@ -26,6 +26,8 @@ class CrowdAgent(CellAgent):
         self.speed = np.random.uniform(*CROWD_AGENT_STATS[agent_type]["speed_range"])
         self.crowd_slowdown_factor = CROWD_AGENT_STATS[agent_type]["crowd_slowdown_factor"]
         self.start_crowd_slowdown_factor = CROWD_AGENT_STATS[agent_type]["start_crowd_slowdown_factor"]
+        self.dead_lock_factor = CROWD_AGENT_STATS[agent_type]["dead_lock_factor"]
+        self.dead_lock_counter = 0
 
     def step(self):
         """
@@ -71,6 +73,10 @@ class CrowdAgent(CellAgent):
                 valid_neighbors = self.get_empty_neighbors()
                 self.cell, moved = self.choose_cell(valid_neighbors)
                 self.cells_moved += int(moved)
+                if moved:
+                    self.dead_lock_counter = max(0, self.dead_lock_counter - 2)
+                else:
+                    self.dead_lock_counter += 1
 
         # Always update tracking for this step (moved or not)
         self.cells_moved_last_steps.pop(0)
@@ -100,8 +106,7 @@ class CrowdAgent(CellAgent):
         # Check if the best neighbor is better than staying in current cell
         current_min_distance = get_cell_min_distance(self.cell)
         best_min_distance = get_cell_min_distance(best_cell)
-        
-        if best_min_distance <= current_min_distance:
+        if best_min_distance <= current_min_distance + self.dead_lock_factor * self.dead_lock_counter:
             return best_cell, True
         
         return self.cell, False
@@ -119,13 +124,13 @@ class CrowdAgent(CellAgent):
         if self.cell is None:
             return 0
         
-        surounding_agents = [
+        surrounding_agents = [
             cell for cell in self.cell.neighborhood 
             if all([agent.agent_type not in STATIC_AGENTS for agent in cell.agents]) 
             and not cell.is_empty
         ]
 
-        occupied_cells = len(surounding_agents)
+        occupied_cells = len(surrounding_agents)
 
         if proportion:
             total_cells = len(self.cell.neighborhood)
@@ -148,6 +153,10 @@ class CrowdAgent(CellAgent):
                 for agent in neighbor.agents
             )
         ]
+    
+    def get_dead_lock_factor(self):
+        """Get the dead lock factor for this agent."""
+        return self.dead_lock_factor * self.dead_lock_counter
     
 # ==================================================================
 #                               OBJECTS

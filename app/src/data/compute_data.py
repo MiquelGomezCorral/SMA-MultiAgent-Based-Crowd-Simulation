@@ -1,4 +1,5 @@
 """Functions that compute data from the model."""
+import numpy as np 
 
 def compute_local_density(model, proportion: bool = False):
     """
@@ -31,10 +32,10 @@ def compute_micro_average_speed(model):
     if len(real_agents) == 0:
         return 0
     
-    total_cells_moved = sum(
-        sum(agent.cells_moved_last_steps)
+    total_cells_moved = np.sum([
+        np.sum(agent.cells_moved_last_steps)
         for agent in real_agents
-    )
+    ])
     return total_cells_moved / (model.track_last_steps * len(real_agents))
 
 def compute_evacuation_rate_by_type(model, agent_type):
@@ -55,6 +56,11 @@ def compute_macro_average_speed_by_type(model, agent_type):
     if model.steps == 0 or len(agents_of_type) == 0:
         return 0
     
-    total_cells_moved = sum(agent.cells_moved for agent in agents_of_type)
+    total_cells_moved = np.sum([agent.cells_moved for agent in agents_of_type])
     return total_cells_moved / (model.steps * len(agents_of_type))
 
+def compute_average_dead_lock_factor(model):
+    """Compute the average dead lock factor for all moving agents."""
+    return np.mean([
+        agent.get_dead_lock_factor() for agent in model.get_moving_agents()
+    ]) if model.current_agents > 0 else 0

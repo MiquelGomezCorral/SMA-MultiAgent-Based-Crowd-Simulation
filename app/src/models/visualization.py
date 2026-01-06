@@ -68,8 +68,8 @@ def micro_density_plot(model):
     """Custom plot for micro density."""
     return make_custom_plot(
         model,
-        ["local_density", "micro_average_speed"],
-        "Micro Density Over Time"
+        ["local_density", "micro_average_speed", "dead_lock_factor"],
+        "Density / Speed Over Time"
     )
 
 def make_custom_plot(model, metrics, title):

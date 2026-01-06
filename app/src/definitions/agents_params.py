@@ -23,6 +23,7 @@ CROWD_AGENT_STATS = {
         "speed_range": (0.65, 1.0),
         "crowd_slowdown_factor": 0.3,
         "start_crowd_slowdown_factor": 3,
+        "dead_lock_factor": 1.0,
     },
     CrowdAgentEnum.AGGRESSIVE: {
         "label": "Aggressive",
@@ -32,6 +33,7 @@ CROWD_AGENT_STATS = {
         "speed_range": (0.8, 1.0),
         "crowd_slowdown_factor": 0.1,
         "start_crowd_slowdown_factor": 3,
+        "dead_lock_factor": 0.1,
     },
     CrowdAgentEnum.SLOW: {
         "label": "Slow",
@@ -41,6 +43,7 @@ CROWD_AGENT_STATS = {
         "speed_range": (0.5, 0.65),
         "crowd_slowdown_factor": 0.5,
         "start_crowd_slowdown_factor": 3,
+        "dead_lock_factor": 0.5,
     },
     CrowdAgentEnum.EXIT: {
         "label": "Exit",
@@ -76,6 +79,7 @@ AGENT_TYPE_COLORS = {
     "polite_macro_speed": CROWD_AGENT_STATS[CrowdAgentEnum.POLITE]["color"],
     "aggressive_macro_speed": CROWD_AGENT_STATS[CrowdAgentEnum.AGGRESSIVE]["color"],
     "slow_macro_speed": CROWD_AGENT_STATS[CrowdAgentEnum.SLOW]["color"],
+    "dead_lock_factor": "tab:red",
 }
 
     

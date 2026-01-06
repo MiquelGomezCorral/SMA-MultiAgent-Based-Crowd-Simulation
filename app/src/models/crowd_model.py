@@ -10,7 +10,8 @@ from src.config import Configuration
 from src.data import (
     compute_local_density, compute_evacuation_rate,
     compute_macro_average_speed, compute_micro_average_speed,
-    compute_evacuation_rate_by_type, compute_macro_average_speed_by_type
+    compute_evacuation_rate_by_type, compute_macro_average_speed_by_type,
+    compute_average_dead_lock_factor
 )
 from src.utils import get_manhattan_distance, get_l2_distance
 
@@ -73,6 +74,8 @@ class CrowdModel(mesa.Model):
                 "polite_macro_speed": lambda m: compute_macro_average_speed_by_type(m, CrowdAgentEnum.POLITE),
                 "aggressive_macro_speed": lambda m: compute_macro_average_speed_by_type(m, CrowdAgentEnum.AGGRESSIVE),
                 "slow_macro_speed": lambda m: compute_macro_average_speed_by_type(m, CrowdAgentEnum.SLOW),
+
+                "dead_lock_factor": compute_average_dead_lock_factor,
             },
             agent_reporters={},
         )
@@ -163,10 +166,10 @@ class CrowdModel(mesa.Model):
 
     def _create_walls(self):
         """Create wall agents around the grid perimeter."""
-        for xx in range(-2, 2):
+        for xx in range(-8, 8):
             x = xx + self.grid.width // 2 
-            for y in range(4, self.grid.height - 4):
-                if y == self.grid.height // 2 or y == (self.grid.height // 2) - 1 or y == (self.grid.height // 2) + 1 :
+            for y in range(3, self.grid.height - 3):
+                if y == self.grid.height // 2 or y == (self.grid.height // 2) - 1 or y == (self.grid.height // 2) + 1: #or y == (self.grid.height // 2) + 2 or y == (self.grid.height // 2) - 2:
                     continue  # Leave exit gap
                 wall_agent = CrowdWall(self)
                 wall_agent.cell = self.grid[(x, y)]
