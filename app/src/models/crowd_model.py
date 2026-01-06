@@ -166,7 +166,7 @@ class CrowdModel(mesa.Model):
         for xx in range(-2, 2):
             x = xx + self.grid.width // 2 
             for y in range(4, self.grid.height - 4):
-                if y == self.grid.height // 2 or y == (self.grid.height // 2) - 1 or y == (self.grid.height // 2) + 1 or y == (self.grid.height // 2) - 2 or y == (self.grid.height // 2) + 2:
+                if y == self.grid.height // 2 or y == (self.grid.height // 2) - 1 or y == (self.grid.height // 2) + 1 :
                     continue  # Leave exit gap
                 wall_agent = CrowdWall(self)
                 wall_agent.cell = self.grid[(x, y)]
@@ -179,9 +179,10 @@ class CrowdModel(mesa.Model):
             self.grid[(self.grid.width - 1, 0)],
             self.grid[(self.grid.width - 1, self.grid.height - 1)],
             # self.grid[(0, self.grid.height // 2)],
-            self.grid[(self.grid.width - 1, self.grid.height // 2)],
+            # self.grid[(self.grid.width - 1, self.grid.height // 2)],
             # self.grid[(self.grid.width // 3, self.grid.height // 2)],
-            self.grid[(2 * self.grid.width // 3, self.grid.height // 2)],
+            # self.grid[(2 * self.grid.width // 3, self.grid.height // 2)],
+            # self.grid[(self.grid.width // 2, self.grid.height // 2)],
         ]
         self.n_exits = len(self.exit_cells)
 

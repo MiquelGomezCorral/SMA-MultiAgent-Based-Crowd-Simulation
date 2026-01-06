@@ -17,11 +17,15 @@ class CrowdAgent(CellAgent):
         self.agent_type = agent_type
         self.cells_moved = 0
         self.cells_moved_last_steps = [0] * track_last_steps  # For averaging speed over last steps
-        self.exit_idx = model.random.randint(0, number_of_exits - 1) if number_of_exits is not None else None
+        self.exit_idx = (
+            model.random.randint(0, number_of_exits - 1) 
+            if number_of_exits is not None else None
+        )
         # The speed determines the probability of moving each step
         # The higher the speed, the more likely the agent is to move
         self.speed = np.random.uniform(*CROWD_AGENT_STATS[agent_type]["speed_range"])
         self.crowd_slowdown_factor = CROWD_AGENT_STATS[agent_type]["crowd_slowdown_factor"]
+        self.start_crowd_slowdown_factor = CROWD_AGENT_STATS[agent_type]["start_crowd_slowdown_factor"]
 
     def step(self):
         """
@@ -49,15 +53,25 @@ class CrowdAgent(CellAgent):
     
     def move(self):
         """Move to closest exit among empty neighboring cells"""
+        
         moved = False
         
         # Skip movement based on speed probability
         if self.random.random() <= self.speed:
-            valid_neighbors = [cell for cell in self.cell.neighborhood if cell.is_empty]
-            if valid_neighbors:
+            # Apply crowd slowdown factor
+            agent_neighbors = self.get_agent_neighbors()
+            crowd = 8 - len(agent_neighbors)
+            slowdown = (
+                self.crowd_slowdown_factor * 
+                (crowd - self.start_crowd_slowdown_factor) / 
+                (8 - self.start_crowd_slowdown_factor)
+            )
+
+            if self.random.random() >= slowdown:
+                valid_neighbors = self.get_empty_neighbors()
                 self.cell, moved = self.choose_cell(valid_neighbors)
                 self.cells_moved += int(moved)
-        
+
         # Always update tracking for this step (moved or not)
         self.cells_moved_last_steps.pop(0)
         self.cells_moved_last_steps.append(int(moved))
@@ -118,7 +132,22 @@ class CrowdAgent(CellAgent):
             return occupied_cells / total_cells if total_cells > 0 else 0
         else:
             return occupied_cells
-  
+    
+    def get_empty_neighbors(self):
+        """Get list of empty neighboring cells."""
+        return [
+            neighbor for neighbor in self.cell.neighborhood 
+            if neighbor.is_empty
+        ]
+    def get_agent_neighbors(self):
+        """Get list of neighboring cells that contain agents."""
+        return [
+            neighbor for neighbor in self.cell.neighborhood 
+            if any(
+                agent.agent_type not in STATIC_AGENTS 
+                for agent in neighbor.agents
+            )
+        ]
     
 # ==================================================================
 #                               OBJECTS
