@@ -159,6 +159,11 @@ def simulation_stats(model):
     if not model.running:
         text_content += f"\n**FINISHED!** Total time: `{step}` steps."
 
+
+    # {model.capacity_warning + '\n' if hasattr(model, 'capacity_warning') and model.capacity_warning else ''}| Metric | Current | Max | Avg | {"|".join(active_agent_types_display)} |
+    if model.capacity_warning:
+        text_content = f"**WARNING:** {model.capacity_warning}\n\n" + text_content
+
     return solara.Markdown(text_content)
 
 def extract_grid_data(model, property_name="exit_distances", aggregator=None):

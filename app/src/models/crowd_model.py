@@ -38,6 +38,7 @@ class CrowdModel(mesa.Model):
         self.scenario_type = CONFIG.scenario_type
         self.n_exits = CONFIG.n_exits
         self.STATIC_AGENTS = STATIC_AGENTS
+        self.capacity_warning = None
         self._normalize_ratios()
 
 
@@ -296,7 +297,10 @@ class CrowdModel(mesa.Model):
         """Get a list of initial cells to place agents."""
         empty_cells = [c for c in self.grid.all_cells if c.is_empty]
         if len(empty_cells) < self.initial_agents["Total"]:
-            raise ValueError("Not enough empty cells to place all agents.")
+            original_count = self.initial_agents["Total"]
+            self.initial_agents["Total"] = len(empty_cells)
+            self.current_agents = len(empty_cells)
+            self.capacity_warning = f"⚠️ Reduced agents from {original_count} to {len(empty_cells)} due to grid capacity."
         return self.random.sample(empty_cells, k=self.initial_agents["Total"])
     
     def _get_initial_agent_counts(self):
