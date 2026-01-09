@@ -13,17 +13,19 @@ class CrowdAgent(CellAgent):
         model,
         agent_type: CrowdAgentEnum = CrowdAgentEnum.POLITE,
         track_last_steps: int = 5,
-        number_of_exits: int = None
+        number_of_exits: int = None,
+        respawn: bool = False,
     ):
         super().__init__(model)
         if track_last_steps <= 0:
             raise ValueError("track_last_steps must be a positive integer.")
         
         self.agent_type = agent_type
-        self.cells_moved = 0
-        self.cells_moved_last_steps = [0] * track_last_steps  # For averaging speed over last steps
+        self.respawn = respawn
+        self.track_last_steps = track_last_steps
+        
         self.exit_idx = (
-            model.random.randint(0,number_of_exits - 1) 
+            model.random.randint(0, number_of_exits - 1) 
             if number_of_exits is not None else None
         )
         
@@ -31,8 +33,9 @@ class CrowdAgent(CellAgent):
         self.crowd_slowdown_factor = CROWD_AGENT_STATS[agent_type]["crowd_slowdown_factor"]
         self.start_crowd_slowdown_factor = CROWD_AGENT_STATS[agent_type]["start_crowd_slowdown_factor"]
         self.dead_lock_factor = CROWD_AGENT_STATS[agent_type]["dead_lock_factor"]
-        self.dead_lock_counter = 0
         self.max_dead_lock_counter = CROWD_AGENT_STATS[agent_type]["max_dead_lock_counter"]
+
+        self._reset_agent_state()
 
     def step(self):
         """
@@ -42,25 +45,27 @@ class CrowdAgent(CellAgent):
         if self.cell is None:
             return
         
-        # Remove agent if reached exit (i.e., neighboring an exit cell)
-        if any(
-            any( # Check if any agent in neighbor cell is an exit matching this agent's exit_idx
-                agent.agent_type == CrowdAgentEnum.EXIT 
-                and (agent.exit_idx == self.exit_idx or self.exit_idx is None) 
-                for agent in neighbor.agents
-            ) 
-            for neighbor in self.cell.neighborhood
-        ):
-            self.cell = None
-            self.model.agents.remove(self)
-            return
+        finished = self._check_agent_finished()
 
-        # Else move
-        self.move()
+        if not finished:
+            # Agent continues moving toward exit
+            self.move()
+        else:
+            # Agent has reached an exit
+            self.model.update_evacuated_counter(self.agent_type)
+            
+            if not self.respawn:
+                # Remove agent from the model
+                self.cell = None
+                self.model.agents.remove(self)
+            else:
+                # Respawn agent at a random empty cell that's not adjacent to target exit
+                self._respawn_agent()
+                
+        
     
     def move(self):
         """Move to closest exit among empty neighboring cells"""
-        
         moved = False
         
         # Skip movement based on speed probability
@@ -175,6 +180,52 @@ class CrowdAgent(CellAgent):
     def get_dead_lock_factor(self):
         """Get the dead lock factor for this agent."""
         return self.dead_lock_factor * self.dead_lock_counter
+    
+    def _check_agent_finished(self):
+        # Remove agent if reached exit (i.e., neighboring an exit cell)
+        return self._is_cell_finished(self.cell)
+    
+    def _is_cell_finished(self, cell):
+        """Check if being at a given cell would mean the agent is finished."""
+        return any(
+            any( # Check if any agent in neighbor cell is an exit matching this agent's exit_idx
+                agent.agent_type == CrowdAgentEnum.EXIT 
+                and (agent.exit_idx == self.exit_idx or self.exit_idx is None) 
+                for agent in neighbor.agents
+            ) 
+            for neighbor in cell.neighborhood
+        )
+    
+    def _respawn_agent(self):
+        """Handle agent respawning logic after reaching an exit."""
+        empty_cells = self.model.get_empty_cells()
+        
+        # Filter out cells adjacent to the agent's target exit to avoid immediate re-finishing
+        valid_respawn_cells = [
+            cell for cell in empty_cells
+            if not self._is_cell_finished(cell)
+        ]
+        
+        if valid_respawn_cells:
+            self.cell = self.random.choice(valid_respawn_cells)
+            self._reset_agent_state()
+        elif empty_cells:
+            # Fallback: use any empty cell if no valid respawn cells
+            self.cell = self.random.choice(empty_cells)
+            self._reset_agent_state()
+        else:
+            # No empty cells available - remove agent and log warning
+            if not hasattr(self.model, 'respawn_warning_logged'):
+                self.model.capacity_warning = "⚠️ Respawn failed: No empty cells available. Some agents removed."
+                self.model.respawn_warning_logged = True
+            self.cell = None
+            self.model.agents.remove(self)
+    
+    def _reset_agent_state(self):
+        """Reset agent tracking variables after respawning."""
+        self.cells_moved = 0
+        self.cells_moved_last_steps = [0] * self.track_last_steps
+        self.dead_lock_counter = 0
     
 # ==================================================================
 #                               OBJECTS

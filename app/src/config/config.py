@@ -21,6 +21,7 @@ class Configuration:
     scenario_type: Literal["OPEN", "MALL", "CORRIDOR", "SEATS", "SNAKE", "RANDOM"] = "MALL"
     n_exits: int = 4
     differentiate_exits: bool = True
+    respawn_agents: bool = False
 
     n_experiments: int = 1000
 

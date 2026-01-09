@@ -41,13 +41,15 @@ def compute_micro_average_speed(model):
 def compute_evacuation_rate_by_type(model, agent_type):
     """Compute the evacuation rate for a specific agent type."""
     
-    initial_count = model.initial_agents.get(agent_type, 0)
-    if initial_count == 0 or model.steps == 0:
-        return 0
+    # initial_count = model.initial_agents.get(agent_type, 0)
+    # if initial_count == 0 or model.steps == 0:
+    #     return 0
     
-    current_count = model.compute_agents_by_type(agent_type)
-    evacuated_agents = initial_count - current_count
-    return evacuated_agents / model.steps
+    # current_count = model.compute_agents_by_type(agent_type)
+    # evacuated_agents = initial_count - current_count
+    # return evacuated_agents / model.steps
+
+    return model.evacuated_counter[agent_type] / model.steps if model.steps > 0 else 0
 
 def compute_macro_average_speed_by_type(model, agent_type):
     """Compute the macro average speed for a specific agent type."""

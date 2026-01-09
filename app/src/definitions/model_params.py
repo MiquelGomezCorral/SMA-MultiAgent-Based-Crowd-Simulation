@@ -58,10 +58,23 @@ basic_model_params = {
         "max": 1.0,
         "step": 0.1,
     },
+    "n_exits": {
+        "type": "SliderInt",
+        "value": 4,
+        "label": "Number of exits:",
+        "min": 1,
+        "max": 8,
+        "step": 1,
+    },
     "differentiate_exits": {
         "type": "Checkbox",
         "value": True,
         "label": "Differentiate exits (No is evacuation / Yes is exit-specific)",
+    },
+    "respawn_agents": {
+        "type": "Checkbox",
+        "value": True,
+        "label": "Respawn agents after reaching an exit",
     },
     "path_finding_algorithm": {
         "type": "Select",
@@ -74,13 +87,5 @@ basic_model_params = {
         "value": "MALL",
         "label": "Scenario Type:",
         "values": ["OPEN", "MALL", "CORRIDOR", "SEATS", "SNAKE", "RANDOM"],
-    },
-    "n_exits": {
-        "type": "SliderInt",
-        "value": 4,
-        "label": "Number of exits:",
-        "min": 1,
-        "max": 8,
-        "step": 1,
     },
 }

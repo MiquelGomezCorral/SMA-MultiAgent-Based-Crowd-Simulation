@@ -1,8 +1,9 @@
 """Model module for the Crowd Simulation."""
 
+
 import heapq
-import numpy as np
 import mesa
+from collections import Counter
 from mesa import DataCollector
 from mesa.discrete_space import OrthogonalMooreGrid
 
@@ -37,9 +38,11 @@ class CrowdModel(mesa.Model):
         self.differentiate_exits = CONFIG.differentiate_exits
         self.scenario_type = CONFIG.scenario_type
         self.n_exits = CONFIG.n_exits
+        self.respawn_agents = CONFIG.respawn_agents
         self.STATIC_AGENTS = STATIC_AGENTS
         self.capacity_warning = None
         self._normalize_ratios()
+        self.evacuated_counter = Counter()
 
 
         # ========== CREATE GRID ==========
@@ -85,6 +88,7 @@ class CrowdModel(mesa.Model):
         )
         self.datacollector.collect(self)
         self._initialize_max_values()
+        
 
     def step(self):
         priority = self.agents.select(lambda a: a in self.priority_agents)
@@ -100,6 +104,10 @@ class CrowdModel(mesa.Model):
     
     def check_model_end(self):
         """Check if there are any active agents left in the model."""
+        # Don't end simulation if respawn is enabled
+        if self.respawn_agents:
+            return
+            
         active_agents = [
             a for a in self.agents 
             if a.agent_type not in ["exit", "wall"]
@@ -130,6 +138,11 @@ class CrowdModel(mesa.Model):
         """Compute the number of agents of a specific type."""
         return len(self.get_agents_by_type(agent_type))
     
+    def update_evacuated_counter(self, agent_type: CrowdAgentEnum):
+        """Update the evacuated counter for a specific agent type."""
+        self.evacuated_counter[agent_type] += 1
+        self.evacuated_counter["Total"] += 1
+    
     def _update_agent_count(self):
         """Update the current number of active agents."""
         self.current_agents = len(self.get_moving_agents())
@@ -157,6 +170,7 @@ class CrowdModel(mesa.Model):
                 agent_type = agent_type,
                 track_last_steps = self.track_last_steps,
                 number_of_exits = self.n_exits if self.differentiate_exits else None,
+                respawn = self.respawn_agents,
             )
             if agent_type == CrowdAgentEnum.AGGRESSIVE:
                 self.priority_agents.extend(agents)
@@ -293,9 +307,13 @@ class CrowdModel(mesa.Model):
             else self.max_micro_average_speed
         )
 
+    def get_empty_cells(self):
+        """Get a list of all empty cells in the grid."""
+        return [c for c in self.grid.all_cells if c.is_empty]
+    
     def _get_initial_cells(self):
         """Get a list of initial cells to place agents."""
-        empty_cells = [c for c in self.grid.all_cells if c.is_empty]
+        empty_cells = self.get_empty_cells()
         if len(empty_cells) < self.initial_agents["Total"]:
             original_count = self.initial_agents["Total"]
             self.initial_agents["Total"] = len(empty_cells)
@@ -342,6 +360,7 @@ class CrowdModelWrapper(CrowdModel):
         scenario_type="MALL",
         n_exits=4,
         differentiate_exits=True,
+        respawn_agents=True,
     ):
         config = Configuration(
             initial_agents=initial_agents,
@@ -358,6 +377,7 @@ class CrowdModelWrapper(CrowdModel):
             differentiate_exits=differentiate_exits,
             scenario_type=scenario_type,
             n_exits=n_exits,
+            respawn_agents=respawn_agents,
         )
         super().__init__(config)
 
