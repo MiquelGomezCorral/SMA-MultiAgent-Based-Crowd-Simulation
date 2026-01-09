@@ -69,4 +69,18 @@ basic_model_params = {
         "label": "Path Finding Algorithm:",
         "values": ["MANHATTAN", "BFS", "A*"],
     },
+    "scenario_type": {
+        "type": "Select",
+        "value": "MALL",
+        "label": "Scenario Type:",
+        "values": ["OPEN", "MALL", "CORRIDOR", "SEATS", "SNAKE", "RANDOM"],
+    },
+    "n_exits": {
+        "type": "SliderInt",
+        "value": 4,
+        "label": "Number of exits:",
+        "min": 1,
+        "max": 8,
+        "step": 1,
+    },
 }

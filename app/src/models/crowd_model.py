@@ -16,6 +16,7 @@ from src.data import (
 from src.utils import get_manhattan_distance, get_l2_distance
 
 from src.definitions import CrowdAgentEnum, STATIC_AGENTS
+from src.definitions.scenarios import get_wall_positions, get_exit_positions
 from .crowd_agents import CrowdAgent, CrowdExit, CrowdWall
 
 # ==================================================================
@@ -34,6 +35,8 @@ class CrowdModel(mesa.Model):
         self.track_last_steps = CONFIG.track_last_steps
         self.path_finding_algorithm = CONFIG.path_finding_algorithm
         self.differentiate_exits = CONFIG.differentiate_exits
+        self.scenario_type = CONFIG.scenario_type
+        self.n_exits = CONFIG.n_exits
         self.STATIC_AGENTS = STATIC_AGENTS
         self._normalize_ratios()
 
@@ -165,28 +168,29 @@ class CrowdModel(mesa.Model):
             agent.cell = cell
 
     def _create_walls(self):
-        """Create wall agents around the grid perimeter."""
-        for xx in range(-8, 8):
-            x = xx + self.grid.width // 2 
-            for y in range(3, self.grid.height - 3):
-                if y == self.grid.height // 2 or y == (self.grid.height // 2) - 1 or y == (self.grid.height // 2) + 1: #or y == (self.grid.height // 2) + 2 or y == (self.grid.height // 2) - 2:
-                    continue  # Leave exit gap
-                wall_agent = CrowdWall(self)
-                wall_agent.cell = self.grid[(x, y)]
+        """Create wall agents based on scenario type."""
+        wall_positions = get_wall_positions(
+            scenario_type=self.scenario_type,
+            width=self.grid.width,
+            height=self.grid.height,
+            seed=self.random.randint(0, 1000000)
+        )
+        
+        for x, y in wall_positions:
+            wall_agent = CrowdWall(self)
+            wall_agent.cell = self.grid[(x, y)]
 
     def _create_exits(self):
-        """Create exit agents at predefined locations and compute distances."""
-        self.exit_cells = [
-            self.grid[(0, 0)],
-            self.grid[(0, self.grid.height - 1)],
-            self.grid[(self.grid.width - 1, 0)],
-            self.grid[(self.grid.width - 1, self.grid.height - 1)],
-            # self.grid[(0, self.grid.height // 2)],
-            # self.grid[(self.grid.width - 1, self.grid.height // 2)],
-            # self.grid[(self.grid.width // 3, self.grid.height // 2)],
-            # self.grid[(2 * self.grid.width // 3, self.grid.height // 2)],
-            # self.grid[(self.grid.width // 2, self.grid.height // 2)],
-        ]
+        """Create exit agents based on scenario type and number of exits."""
+        exit_positions = get_exit_positions(
+            scenario_type=self.scenario_type,
+            width=self.grid.width,
+            height=self.grid.height,
+            n_exits=self.n_exits,
+            seed=self.random.randint(0, 1000000)
+        )
+        
+        self.exit_cells = [self.grid[(x, y)] for x, y in exit_positions]
         self.n_exits = len(self.exit_cells)
 
         for idx, cell in enumerate(self.exit_cells):
@@ -243,7 +247,7 @@ class CrowdModel(mesa.Model):
                     }
 
                     if self.path_finding_algorithm == "A*":
-                        open_cell.exit_distances[idx]["F"] = get_l2_distance(open_cell, exit_cell)
+                        open_cell.exit_distances[idx]["F"] = 0.5*get_l2_distance(open_cell, exit_cell)
                     
                     open_cell.exit_distances[idx]["Total"] = (
                         open_cell.exit_distances[idx]["G"] + open_cell.exit_distances[idx]["F"]
@@ -331,6 +335,8 @@ class CrowdModelWrapper(CrowdModel):
         slow_ratio=0.2,
         track_last_steps=5,
         path_finding_algorithm="A*",
+        scenario_type="MALL",
+        n_exits=4,
         differentiate_exits=True,
     ):
         config = Configuration(
@@ -346,6 +352,8 @@ class CrowdModelWrapper(CrowdModel):
             },
             path_finding_algorithm=path_finding_algorithm,
             differentiate_exits=differentiate_exits,
+            scenario_type=scenario_type,
+            n_exits=n_exits,
         )
         super().__init__(config)
 

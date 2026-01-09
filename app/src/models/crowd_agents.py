@@ -9,7 +9,12 @@ from src.definitions import CrowdAgentEnum, STATIC_AGENTS, CROWD_AGENT_STATS
 class CrowdAgent(CellAgent):
     """And agent that moves in a crowd following simple rules."""
 
-    def __init__(self, model, agent_type: CrowdAgentEnum = CrowdAgentEnum.POLITE, track_last_steps: int = 5, number_of_exits: int = None):
+    def __init__(self,
+        model,
+        agent_type: CrowdAgentEnum = CrowdAgentEnum.POLITE,
+        track_last_steps: int = 5,
+        number_of_exits: int = None
+    ):
         super().__init__(model)
         if track_last_steps <= 0:
             raise ValueError("track_last_steps must be a positive integer.")
@@ -18,11 +23,10 @@ class CrowdAgent(CellAgent):
         self.cells_moved = 0
         self.cells_moved_last_steps = [0] * track_last_steps  # For averaging speed over last steps
         self.exit_idx = (
-            model.random.randint(0, number_of_exits - 1) 
+            model.random.randint(0,number_of_exits - 1) 
             if number_of_exits is not None else None
         )
-        # The speed determines the probability of moving each step
-        # The higher the speed, the more likely the agent is to move
+        
         self.speed = np.random.uniform(*CROWD_AGENT_STATS[agent_type]["speed_range"])
         self.crowd_slowdown_factor = CROWD_AGENT_STATS[agent_type]["crowd_slowdown_factor"]
         self.start_crowd_slowdown_factor = CROWD_AGENT_STATS[agent_type]["start_crowd_slowdown_factor"]
@@ -60,6 +64,8 @@ class CrowdAgent(CellAgent):
         moved = False
         
         # Skip movement based on speed probability
+        # The speed determines the probability of moving each step
+        # The higher the speed, the more likely the agent is to move
         if self.random.random() <= self.speed:
             # Apply crowd slowdown factor
             agent_neighbors = self.get_agent_neighbors()
