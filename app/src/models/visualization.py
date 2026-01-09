@@ -60,7 +60,7 @@ def macro_speed_plot(model):
     """Custom plot for macro average speed by agent type."""
     return make_custom_plot(
         model,
-        ["macro_average_speed", "polite_macro_speed", "aggressive_macro_speed", "slow_macro_speed"],
+        ["macro_average_speed", "polite_macro_speed", "aggressive_macro_speed", "slow_macro_speed", "micro_average_speed"],
         "Macro Average Speed by Agent Type"
     )
 
@@ -68,7 +68,7 @@ def micro_density_plot(model):
     """Custom plot for micro density."""
     return make_custom_plot(
         model,
-        ["local_density", "micro_average_speed", "dead_lock_factor"],
+        ["local_density", "dead_lock_factor"],
         "Density / Speed Over Time"
     )
 

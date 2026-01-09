@@ -24,6 +24,7 @@ CROWD_AGENT_STATS = {
         "crowd_slowdown_factor": 0.3,
         "start_crowd_slowdown_factor": 3,
         "dead_lock_factor": 1.0,
+        "max_dead_lock_counter": 50,
     },
     CrowdAgentEnum.AGGRESSIVE: {
         "label": "Aggressive",
@@ -34,6 +35,7 @@ CROWD_AGENT_STATS = {
         "crowd_slowdown_factor": 0.1,
         "start_crowd_slowdown_factor": 3,
         "dead_lock_factor": 0.1,
+        "max_dead_lock_counter": 50,
     },
     CrowdAgentEnum.SLOW: {
         "label": "Slow",
@@ -44,6 +46,7 @@ CROWD_AGENT_STATS = {
         "crowd_slowdown_factor": 0.5,
         "start_crowd_slowdown_factor": 3,
         "dead_lock_factor": 0.5,
+        "max_dead_lock_counter": 50,
     },
     CrowdAgentEnum.EXIT: {
         "label": "Exit",

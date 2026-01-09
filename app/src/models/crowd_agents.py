@@ -28,6 +28,7 @@ class CrowdAgent(CellAgent):
         self.start_crowd_slowdown_factor = CROWD_AGENT_STATS[agent_type]["start_crowd_slowdown_factor"]
         self.dead_lock_factor = CROWD_AGENT_STATS[agent_type]["dead_lock_factor"]
         self.dead_lock_counter = 0
+        self.max_dead_lock_counter = CROWD_AGENT_STATS[agent_type]["max_dead_lock_counter"]
 
     def step(self):
         """
@@ -76,7 +77,15 @@ class CrowdAgent(CellAgent):
                 if moved:
                     self.dead_lock_counter = max(0, self.dead_lock_counter - 2)
                 else:
-                    self.dead_lock_counter += 1
+                    # Increase own counter and add damped influence from neighbors
+                    neighbor_influence = 0
+                    if agent_neighbors:
+                        avg_neighbor_deadlock = np.mean([a.dead_lock_counter for a in agent_neighbors])
+                        neighbor_influence = 0.1 * (avg_neighbor_deadlock - self.dead_lock_counter)
+                    
+                    self.dead_lock_counter += 1 + neighbor_influence
+                    # Optional: cap to prevent unbounded growth
+                    self.dead_lock_counter = min(self.dead_lock_counter, 30)
 
         # Always update tracking for this step (moved or not)
         self.cells_moved_last_steps.pop(0)
@@ -147,12 +156,15 @@ class CrowdAgent(CellAgent):
     def get_agent_neighbors(self):
         """Get list of neighboring cells that contain agents."""
         return [
-            neighbor for neighbor in self.cell.neighborhood 
-            if any(
-                agent.agent_type not in STATIC_AGENTS 
-                for agent in neighbor.agents
-            )
+            agent 
+            for neighbor in self.cell.neighborhood 
+                if any(
+                    agent.agent_type not in STATIC_AGENTS 
+                    for agent in neighbor.agents
+                )
+            for agent in neighbor.agents
         ]
+        
     
     def get_dead_lock_factor(self):
         """Get the dead lock factor for this agent."""
