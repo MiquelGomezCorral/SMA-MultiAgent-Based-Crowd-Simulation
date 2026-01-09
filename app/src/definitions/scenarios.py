@@ -3,6 +3,7 @@
 This module contains functions to generate wall and exit positions
 for different evacuation scenarios.
 """
+from dataclasses import dataclass
 from typing import Literal, Tuple, List
 import random
 
@@ -102,6 +103,13 @@ def _get_open_exits(width: int, height: int, n_exits: int) -> List[Tuple[int, in
 
 
 # ==================== MALL SCENARIO ====================
+@dataclass
+class MallConfig:
+    """Configuration for MALL scenario."""
+    corridor_width: int = 2  # Corridor is 3 cells wide (center ± 1)
+    outer_ring: int = 2  # Outer ring is walkable
+
+
 def _get_mall_walls(width: int, height: int) -> List[Tuple[int, int]]:
     """MALL: 4 crossing corridors with outer ring walkable.
     
@@ -111,11 +119,12 @@ def _get_mall_walls(width: int, height: int) -> List[Tuple[int, int]]:
     - Outer ring (1 cell from borders) is walkable
     - Rest is walls
     """
+    config = MallConfig()
     walls = []
     center_x = width // 2
     center_y = height // 2
-    corridor_width = 2  # Corridor is 3 cells wide (center ± 1)
-    outer_ring = 2  # Outer ring is walkable
+    corridor_width = config.corridor_width
+    outer_ring = config.outer_ring
     
     for x in range(outer_ring, width - outer_ring):
         for y in range(outer_ring, height - outer_ring):
@@ -163,12 +172,19 @@ def _get_mall_exits(width: int, height: int, n_exits: int) -> List[Tuple[int, in
 
 
 # ==================== CORRIDOR SCENARIO ====================
+@dataclass
+class CorridorConfig:
+    """Configuration for CORRIDOR scenario."""
+    corridor_width: int = 1  # Corridor is 3 cells wide (center ± 1)
+
+
 def _get_corridor_walls(width: int, height: int) -> List[Tuple[int, int]]:
     """CORRIDOR: Only 4 crossing paths are walkable (simpler version of MALL)."""
+    config = CorridorConfig()
     walls = []
     center_x = width // 2
     center_y = height // 2
-    corridor_width = 1  # Corridor is 3 cells wide (center ± 1)
+    corridor_width = config.corridor_width
     
     for x in range(width):
         for y in range(height):
@@ -200,6 +216,18 @@ def _get_corridor_exits(width: int, height: int, n_exits: int) -> List[Tuple[int
 
 
 # ==================== SEATS SCENARIO ====================
+@dataclass
+class SeatsConfig:
+    """Configuration for SEATS scenario."""
+    row_width: int = 2  # Each row is 2 cells wide
+    aisle_width: int = 2  # Aisles are 2 cells wide
+    
+    @property
+    def gap_seats_every(self) -> int:
+        """Calculate gap between seats."""
+        return (self.row_width + self.aisle_width) * 2
+
+
 def _get_seats_walls(width: int, height: int) -> List[Tuple[int, int]]:
     """SEATS: Rows of seats with aisles between them.
     
@@ -207,10 +235,11 @@ def _get_seats_walls(width: int, height: int) -> List[Tuple[int, int]]:
     - Rows of seats (walls) with aisles between
     - All exits on one side (right side)
     """
+    config = SeatsConfig()
     walls = []
-    row_width = 2  # Each row is 2 cells wide
-    aisle_width = 2  # Aisles are 2 cells wide
-    gap_seats_every = (row_width + aisle_width)*2  # Leave space for aisles
+    row_width = config.row_width
+    aisle_width = config.aisle_width
+    gap_seats_every = config.gap_seats_every
     
     x = 0
     while x < width - 5:  # Leave space for exit side
@@ -242,20 +271,28 @@ def _get_seats_exits(width: int, height: int, n_exits: int) -> List[Tuple[int, i
 
 
 # ==================== SNAKE SCENARIO ====================
+@dataclass
+class SnakeConfig:
+    """Configuration for SNAKE scenario."""
+    corridor_width: int = 2
+    segments: int = 4  # Number of horizontal segments
+
+
 def _get_snake_walls(width: int, height: int, seed: int = 42) -> List[Tuple[int, int]]:
     """SNAKE: S-shaped or multiple S-shaped corridors.
     
     Creates a snake-like path through the grid.
     """
+    config = SnakeConfig()
     walls = []
-    corridor_width = 2
+    corridor_width = config.corridor_width
     
     # Initialize all cells as walls
     all_cells = set((x, y) for x in range(width) for y in range(height))
     walkable = set()
     
     # Create snake path
-    segments = 4  # Number of horizontal segments
+    segments = config.segments
     segment_height = height // segments
     
     for seg in range(segments):
@@ -300,11 +337,12 @@ def _get_snake_walls(width: int, height: int, seed: int = 42) -> List[Tuple[int,
 
 def _get_snake_exits(width: int, height: int, n_exits: int, seed: int = 42) -> List[Tuple[int, int]]:
     """SNAKE: Exits at the start and end of the snake."""
+    config = SnakeConfig()
     all_exits = [
         (0, height // 8),  # Start of snake (top-left area)
-        (width - 1, height - height // 8),  # End of snake (bottom-right area)
-        (0, height // 2),  # Middle-left
-        (width - 1, height // 2),  # Middle-right
+        (0, height - height // 8 - config.corridor_width - 1),  # End of snake (bottom-left area)
+        # (0, height // 2),  # Middle-left
+        # (width - 1, height // 2),  # Middle-right
     ]
     return all_exits[:n_exits]
 
