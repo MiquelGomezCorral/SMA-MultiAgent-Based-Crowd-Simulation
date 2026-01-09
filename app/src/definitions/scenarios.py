@@ -348,36 +348,93 @@ def _get_snake_exits(width: int, height: int, n_exits: int, seed: int = 42) -> L
 
 
 # ==================== RANDOM SCENARIO ====================
+@dataclass
+class RandomConfig:
+    """Configuration for RANDOM scenario."""
+    min_blobs: int = 3
+    max_blobs: int = 6
+    min_lines: int = 1
+    max_lines: int = 3
+    min_circles: int = 1
+    max_circles: int = 3
+    min_blob_size: int = 2
+    max_blob_size: int = 4
+    min_circle_radius: int = 2
+    max_circle_radius: int = 4
+    min_line_length: int = 5
+    max_line_length: int = 12
+    border_margin: int = 2  # Keep this much space from borders
+
+
 def _get_random_walls(width: int, height: int, seed: int = 42) -> List[Tuple[int, int]]:
-    """RANDOM: Random blobs of walls scattered across the grid.
+    """RANDOM: Random blobs, circles, and lines scattered across the grid.
     
-    Creates random obstacle blobs throughout the grid.
+    Creates random obstacle patterns throughout the grid including:
+    - Random blobs
+    - Circular chunks
+    - Straight or diagonal lines
     """
+    config = RandomConfig()
     rng = random.Random(seed)
     walls = set()
     
-    # Number of blobs
-    n_blobs = rng.randint(5, 10)
-    
+    # Create random blobs
+    n_blobs = rng.randint(config.min_blobs, config.max_blobs)
     for _ in range(n_blobs):
-        # Random blob center
-        center_x = rng.randint(2, width - 3)
-        center_y = rng.randint(2, height - 3)
+        center_x = rng.randint(config.border_margin, width - config.border_margin - 1)
+        center_y = rng.randint(config.border_margin, height - config.border_margin - 1)
+        blob_size = rng.randint(config.min_blob_size, config.max_blob_size)
         
-        # Random blob size
-        blob_size = rng.randint(2, 5)
-        
-        # Create blob with random shape
         for _ in range(blob_size * 3):
             dx = rng.randint(-blob_size, blob_size)
             dy = rng.randint(-blob_size, blob_size)
+            x, y = center_x + dx, center_y + dy
             
-            x = center_x + dx
-            y = center_y + dy
-            
-            # Keep within bounds and not on borders
-            if 1 <= x < width - 1 and 1 <= y < height - 1:
+            if config.border_margin <= x < width - config.border_margin and config.border_margin <= y < height - config.border_margin:
                 walls.add((x, y))
+    
+    # Create circular chunks
+    n_circles = rng.randint(config.min_circles, config.max_circles)
+    for _ in range(n_circles):
+        center_x = rng.randint(config.border_margin + 3, width - config.border_margin - 4)
+        center_y = rng.randint(config.border_margin + 3, height - config.border_margin - 4)
+        radius = rng.randint(config.min_circle_radius, config.max_circle_radius)
+        
+        for x in range(center_x - radius, center_x + radius + 1):
+            for y in range(center_y - radius, center_y + radius + 1):
+                # Check if point is within circle
+                if (x - center_x) ** 2 + (y - center_y) ** 2 <= radius ** 2:
+                    if config.border_margin <= x < width - config.border_margin and config.border_margin <= y < height - config.border_margin:
+                        walls.add((x, y))
+    
+    # Create random lines (horizontal, vertical, or diagonal)
+    n_lines = rng.randint(config.min_lines, config.max_lines)
+    for _ in range(n_lines):
+        line_type = rng.choice(['horizontal', 'vertical', 'diagonal'])
+        length = rng.randint(config.min_line_length, config.max_line_length)
+        
+        if line_type == 'horizontal':
+            y = rng.randint(config.border_margin, height - config.border_margin - 1)
+            x_start = rng.randint(config.border_margin, max(config.border_margin + 1, width - length - config.border_margin))
+            for x in range(x_start, min(x_start + length, width - config.border_margin)):
+                walls.add((x, y))
+                
+        elif line_type == 'vertical':
+            x = rng.randint(config.border_margin, width - config.border_margin - 1)
+            y_start = rng.randint(config.border_margin, max(config.border_margin + 1, height - length - config.border_margin))
+            for y in range(y_start, min(y_start + length, height - config.border_margin)):
+                walls.add((x, y))
+                
+        else:  # diagonal
+            x_start = rng.randint(config.border_margin, width - config.border_margin - 1)
+            y_start = rng.randint(config.border_margin, height - config.border_margin - 1)
+            direction = rng.choice([(1, 1), (1, -1), (-1, 1), (-1, -1)])
+            
+            for i in range(length):
+                x = x_start + i * direction[0]
+                y = y_start + i * direction[1]
+                if config.border_margin <= x < width - config.border_margin and config.border_margin <= y < height - config.border_margin:
+                    walls.add((x, y))
     
     return list(walls)
 
