@@ -8,17 +8,18 @@ import dataclasses
 from dataclasses import dataclass
 import os
 from typing import Literal
+
 @dataclass 
 class Configuration:
     """Configuration class for the project."""
     LOGS_DIR:  str = os.path.join("..", "logs")
 
     seed:     int = 42
-    exp_name: str = "base_name"
-    width:    int = 10
-    height:   int = 10
-    initial_agents: int = 10
-    track_last_steps: int = 5
+    
+    width:    int = 30
+    height:   int = 30
+    initial_agents: int = 75
+    track_last_steps: int = 4
     path_finding_algorithm: Literal["MANHATTAN", "BFS", "A*"] = "A*"
     scenario_type: Literal["OPEN", "MALL", "CORRIDOR", "SEATS", "SNAKE", "RANDOM"] = "MALL"
     n_exits: int = 4

@@ -348,19 +348,19 @@ class CrowdModel(mesa.Model):
 class CrowdModelWrapper(CrowdModel):
     def __init__(
         self,
-        initial_agents=50,
+        initial_agents=75,
         width=30,
         height=30,
         seed=42,
-        polite_ratio=0.5,
-        aggressive_ratio=0.3,
-        slow_ratio=0.2,
-        track_last_steps=5,
+        polite_ratio=0.7,
+        aggressive_ratio=0.2,
+        slow_ratio=0.1,
+        track_last_steps=4,
         path_finding_algorithm="A*",
         scenario_type="MALL",
         n_exits=4,
         differentiate_exits=True,
-        respawn_agents=True,
+        respawn_agents=False,
     ):
         config = Configuration(
             initial_agents=initial_agents,

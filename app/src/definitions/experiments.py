@@ -12,6 +12,7 @@ def get_experiments(CONFIG: Configuration):
                 "track_last_steps": CONFIG.track_last_steps,
                 "path_finding_algorithm": CONFIG.path_finding_algorithm,
                 "differentiate_exits": CONFIG.differentiate_exits,
+                "respawn_agents": CONFIG.respawn_agents,
                 "polite_ratio": 1.0,
                 "aggressive_ratio": 0.0,
                 "slow_ratio": 0.0,
