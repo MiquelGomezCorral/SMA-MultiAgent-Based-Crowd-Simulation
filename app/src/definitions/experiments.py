@@ -4,7 +4,7 @@ def get_experiments(CONFIG: Configuration):
     """Define different experiment configurations."""
     EXPERIMENTS = [
         {
-            "title": "...",
+            "title": "Evaluate Different Agent Densities",
             "batch_params": {
                 "width": CONFIG.width,
                 "height": CONFIG.height,
