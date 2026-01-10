@@ -18,12 +18,12 @@ class Configuration:
     
     width:    int = 30
     height:   int = 30
-    initial_agents: int = 75
+    initial_agents: int = 125
     track_last_steps: int = 4
     path_finding_algorithm: Literal["MANHATTAN", "BFS", "A*"] = "A*"
     scenario_type: Literal["OPEN", "MALL", "CORRIDOR", "SEATS", "SNAKE", "RANDOM"] = "MALL"
     n_exits: int = 4
-    differentiate_exits: bool = True
+    differentiate_exits: bool = False
     respawn_agents: bool = False
 
     n_experiments: int = 1000

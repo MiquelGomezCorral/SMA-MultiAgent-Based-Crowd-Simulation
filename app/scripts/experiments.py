@@ -2,6 +2,7 @@
 
 import os
 import sys
+import gc
 import mesa 
 import numpy as np
 import pandas as pd
@@ -27,9 +28,15 @@ def run_experiments(DEFAULT_CONFIG: Configuration):
             rng=seed_values.tolist(),
             max_steps=EXP.get("max_steps", 2000),
             number_processes=DEFAULT_CONFIG.n_processes,
-            data_collection_period=1,
+            data_collection_period=EXP["batch_params"].get("data_collection_period", 1),  # Collect data every 10 steps instead of every step
             display_progress=True,
         )
 
         results_df = pd.DataFrame(results)
         results_df.to_csv(os.path.join(DEFAULT_CONFIG.LOGS_DIR, f"experiments_results_{EXP['title'].replace(' ', '_').lower()}.csv"), index=False)
+        
+        # Clear memory after each experiment
+        del results
+        del results_df
+        gc.collect()
+        print_color(f"Memory cleaned after {EXP['title']}", "green")
