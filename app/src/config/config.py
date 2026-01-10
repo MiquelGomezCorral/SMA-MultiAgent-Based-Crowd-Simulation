@@ -6,10 +6,12 @@ everywhere and considered configuration.
 # import os
 import dataclasses
 from dataclasses import dataclass
+import os
 from typing import Literal
 @dataclass 
 class Configuration:
     """Configuration class for the project."""
+    LOGS_DIR:  str = os.path.join("..", "logs")
 
     seed:     int = 42
     exp_name: str = "base_name"
@@ -24,6 +26,7 @@ class Configuration:
     respawn_agents: bool = False
 
     n_experiments: int = 1000
+    n_processes: int = 20
 
     # BEHAVIOR RATIOS
     agent_types_ratios: dict = dataclasses.field(default_factory=lambda: {

@@ -9,3 +9,5 @@ from .agents_params import (
     CROWD_AGENT_STATS,
     AGENT_TYPE_COLORS,
 )
+
+from .experiments import get_experiments
