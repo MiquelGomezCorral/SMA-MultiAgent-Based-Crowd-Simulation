@@ -220,7 +220,7 @@ def _get_corridor_exits(width: int, height: int, n_exits: int) -> List[Tuple[int
 class SeatsConfig:
     """Configuration for SEATS scenario."""
     row_width: int = 2  # Each row is 2 cells wide
-    aisle_width: int = 2  # Aisles are 2 cells wide
+    aisle_width: int = 4      # Aisles are 2 cells wide
     
     @property
     def gap_seats_every(self) -> int:
@@ -247,7 +247,7 @@ def _get_seats_walls(width: int, height: int) -> List[Tuple[int, int]]:
         for offset in range(row_width):
             if x + offset < width - 5:
                 for y in range(1, height - 1):
-                    if y % gap_seats_every == 0:
+                    if y % gap_seats_every in [0]:
                         continue  # Leave aisle
                     walls.append((x + offset, y))
         x += row_width + aisle_width

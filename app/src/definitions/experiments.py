@@ -254,8 +254,78 @@ def get_experiments(CONFIG: Configuration):
         #     }
         # },
 
+        # {
+        #     "title": "N Exit Impact MALL",
+        #     "batch_params": {
+        #         "width": CONFIG.width,
+        #         "height": CONFIG.height,
+        #         "initial_agents": CONFIG.initial_agents,
+        #         "track_last_steps": CONFIG.track_last_steps,
+        #         "path_finding_algorithm": CONFIG.path_finding_algorithm,
+        #         "differentiate_exits": CONFIG.differentiate_exits,
+        #         "respawn_agents": CONFIG.respawn_agents,
+        #         "polite_ratio": CONFIG.agent_types_ratios["polite"],
+        #         "aggressive_ratio": CONFIG.agent_types_ratios["aggressive"],
+        #         "slow_ratio": CONFIG.agent_types_ratios["slow"],
+        #         "scenario_type": ["MALL"],
+        #         "n_exits": range(1, 9),
+        #     }
+        # },
+        # {
+        #     "title": "N Exit Impact SEATS",
+        #     "batch_params": {
+        #         "width": CONFIG.width,
+        #         "height": CONFIG.height,
+        #         "initial_agents": CONFIG.initial_agents,
+        #         "track_last_steps": CONFIG.track_last_steps,
+        #         "path_finding_algorithm": CONFIG.path_finding_algorithm,
+        #         "differentiate_exits": CONFIG.differentiate_exits,
+        #         "respawn_agents": CONFIG.respawn_agents,
+        #         "polite_ratio": CONFIG.agent_types_ratios["polite"],
+        #         "aggressive_ratio": CONFIG.agent_types_ratios["aggressive"],
+        #         "slow_ratio": CONFIG.agent_types_ratios["slow"],
+        #         "scenario_type": ["SEATS"],
+        #         "n_exits": range(1, 9),
+        #     }
+        # },
+        # {
+        #     "title": "N Exit Impact SNAKE",
+        #     "batch_params": {
+        #         "width": CONFIG.width,
+        #         "height": CONFIG.height,
+        #         "initial_agents": CONFIG.initial_agents,
+        #         "track_last_steps": CONFIG.track_last_steps,
+        #         "path_finding_algorithm": CONFIG.path_finding_algorithm,
+        #         "differentiate_exits": CONFIG.differentiate_exits,
+        #         "respawn_agents": CONFIG.respawn_agents,
+        #         "polite_ratio": CONFIG.agent_types_ratios["polite"],
+        #         "aggressive_ratio": CONFIG.agent_types_ratios["aggressive"],
+        #         "slow_ratio": CONFIG.agent_types_ratios["slow"],
+        #         "scenario_type": ["SNAKE"],
+        #         "n_exits": range(1, 3),
+        #     }
+        # },
+        # {
+        #     "title": "N Exit Impact CORRIDOR",
+        #     "batch_params": {
+        #         "width": CONFIG.width,
+        #         "height": CONFIG.height,
+        #         "initial_agents": CONFIG.initial_agents,
+        #         "track_last_steps": CONFIG.track_last_steps,
+        #         "path_finding_algorithm": CONFIG.path_finding_algorithm,
+        #         "differentiate_exits": CONFIG.differentiate_exits,
+        #         "respawn_agents": CONFIG.respawn_agents,
+        #         "polite_ratio": CONFIG.agent_types_ratios["polite"],
+        #         "aggressive_ratio": CONFIG.agent_types_ratios["aggressive"],
+        #         "slow_ratio": CONFIG.agent_types_ratios["slow"],
+        #         "scenario_type": ["CORRIDOR"],
+        #         "n_exits": range(1, 5),
+        #     }
+        # },
+
+
         {
-            "title": "N Exit Impact MALL",
+            "title": "Open space seats impact 3",
             "batch_params": {
                 "width": CONFIG.width,
                 "height": CONFIG.height,
@@ -267,59 +337,8 @@ def get_experiments(CONFIG: Configuration):
                 "polite_ratio": CONFIG.agent_types_ratios["polite"],
                 "aggressive_ratio": CONFIG.agent_types_ratios["aggressive"],
                 "slow_ratio": CONFIG.agent_types_ratios["slow"],
-                "scenario_type": ["MALL"],
-                "n_exits": range(1, 9),
-            }
-        },
-        {
-            "title": "N Exit Impact SEATS",
-            "batch_params": {
-                "width": CONFIG.width,
-                "height": CONFIG.height,
-                "initial_agents": CONFIG.initial_agents,
-                "track_last_steps": CONFIG.track_last_steps,
-                "path_finding_algorithm": CONFIG.path_finding_algorithm,
-                "differentiate_exits": CONFIG.differentiate_exits,
-                "respawn_agents": CONFIG.respawn_agents,
-                "polite_ratio": CONFIG.agent_types_ratios["polite"],
-                "aggressive_ratio": CONFIG.agent_types_ratios["aggressive"],
-                "slow_ratio": CONFIG.agent_types_ratios["slow"],
-                "scenario_type": ["SEATS"],
-                "n_exits": range(1, 9),
-            }
-        },
-        {
-            "title": "N Exit Impact SNAKE",
-            "batch_params": {
-                "width": CONFIG.width,
-                "height": CONFIG.height,
-                "initial_agents": CONFIG.initial_agents,
-                "track_last_steps": CONFIG.track_last_steps,
-                "path_finding_algorithm": CONFIG.path_finding_algorithm,
-                "differentiate_exits": CONFIG.differentiate_exits,
-                "respawn_agents": CONFIG.respawn_agents,
-                "polite_ratio": CONFIG.agent_types_ratios["polite"],
-                "aggressive_ratio": CONFIG.agent_types_ratios["aggressive"],
-                "slow_ratio": CONFIG.agent_types_ratios["slow"],
-                "scenario_type": ["SNAKE"],
-                "n_exits": range(1, 3),
-            }
-        },
-        {
-            "title": "N Exit Impact CORRIDOR",
-            "batch_params": {
-                "width": CONFIG.width,
-                "height": CONFIG.height,
-                "initial_agents": CONFIG.initial_agents,
-                "track_last_steps": CONFIG.track_last_steps,
-                "path_finding_algorithm": CONFIG.path_finding_algorithm,
-                "differentiate_exits": CONFIG.differentiate_exits,
-                "respawn_agents": CONFIG.respawn_agents,
-                "polite_ratio": CONFIG.agent_types_ratios["polite"],
-                "aggressive_ratio": CONFIG.agent_types_ratios["aggressive"],
-                "slow_ratio": CONFIG.agent_types_ratios["slow"],
-                "scenario_type": ["CORRIDOR"],
-                "n_exits": range(1, 5),
+                "scenario_type": "SEATS",
+                "n_exits": CONFIG.n_exits,
             }
         },
 
