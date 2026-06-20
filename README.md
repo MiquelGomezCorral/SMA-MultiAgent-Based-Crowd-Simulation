@@ -1,8 +1,14 @@
 # General Python Project Template
 [English](#english) | [Español](#español)
 
-### Demo
-[![Evacuation Simulation Demo](https://img.youtube.com/vi/HJeZalWTbt4/maxresdefault.jpg)](https://youtu.be/HJeZalWTbt4)
+# Showcase Video
+<div align="center">
+  <a href="https://www.youtube.com/watch?v=HJeZalWTbt4">
+    <img src="https://img.youtube.com/vi/HJeZalWTbt4/0.jpg" alt="YouTube Video">
+  </a>
+  <br>
+  <em>Click the image to watch the video</em>
+</div>
 
 ---
 
