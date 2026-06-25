@@ -12,6 +12,21 @@ descriptionLong:
     Simulación multi-agente para evacuación de multitudes implementada sobre Mesa (Python agent-based modeling). Define tres tipos de agente con comportamientos distintos: educados (ceden paso, sensibles al hacinamiento), agresivos (empujan, menor sensibilidad al bloqueo) y lentos (velocidad reducida, muy sensibles a la densidad). El entorno es una cuadrícula discreta (OrthogonalMooreGrid) con 6 escenarios: OPEN, MALL, CORRIDOR, SEATS (butacas de teatro), SNAKE (camino serpenteante) y RANDOM. Los agentes usan pathfinding configurable (Manhattan, BFS, A*) para dirigirse a las salidas. Se recolectan métricas detalladas: tasa de evacuación, velocidad macro/micro, densidad local, factor de deadlock, por tipo de agente y globales. Los experimentos masivos (1000 ejecuciones por configuración, 16 procesos en paralelo) analizan 7 dimensiones: densidad de agentes, impacto de agresivos, impacto de lentos, algoritmos de pathfinding, preferencia de salida, número de salidas y anchura de salida. Incluye visualización interactiva con Jupyter widgets y paper en LaTeX.
 technologies: [python, jupyter, numpy, pandas, plotly]
 tags: [class]
+logo: readme-imaes/thumbnail.webp
+screenShoots:
+  - readme-imaes/agent_shape_color.png
+  - readme-imaes/deadlock.png
+  - readme-imaes/graph_ui.png
+  - readme-imaes/heatmap_random.png
+  - readme-imaes/heatmap_seats.png
+  - readme-imaes/scenario_corridor.png
+  - readme-imaes/scenario_mall.png
+  - readme-imaes/scenario_open.png
+  - readme-imaes/scenario_random.png
+  - readme-imaes/scenario_seats.png
+  - readme-imaes/scenario_snake.png
+  - readme-imaes/screenshoot_simulation.png
+  - readme-imaes/thumbnail.webp
 youtube: HJeZalWTbt4
 slug: SMA-MultiAgent-Based-Crowd-Simulation
 order: 35
