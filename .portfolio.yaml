@@ -28,6 +28,10 @@ screenShoots:
   - readme-imaes/screenshoot_simulation.png
   - readme-imaes/thumbnail.webp
 youtube: HJeZalWTbt4
+keywords:
+  en: [crowd evacuation, multi-agent simulation, Mesa framework, agent-based modeling, panic behavior, pathfinding, A* BFS Manhattan, fire evacuation, theater mall corridor, social simulation, deadlock factor, agent heterogeneity]
+  es: [evacuación de multitudes, simulación multi-agente, framework Mesa, modelado basado en agentes, comportamiento de pánico, búsqueda de caminos, A* BFS Manhattan, evacuación de incendios, teatro centro comercial pasillo, simulación social, factor de bloqueo, heterogeneidad de agentes]
 slug: SMA-MultiAgent-Based-Crowd-Simulation
 order: 35
 featured: false
+
