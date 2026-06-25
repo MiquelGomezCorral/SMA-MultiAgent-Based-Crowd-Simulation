@@ -1,6 +1,6 @@
 title:
   en: Multi-Agent Based Crowd Evacuation Simulation
-  es: Simulación de Evacuación de Multitudes Basada en Sistemas Multi-Agente
+  es: Simulación Multi-Agente de Evacuación de Multitudes
 finished: finished
 descriptionShort:
   en: Crowd evacuation simulation with heterogeneous agents (polite, aggressive, slow) using the Mesa framework. Explores scenarios (corridor, mall, theater, snake) with A*/BFS/Manhattan pathfinding. Analyzes impact of density, agent types, exit count, and exit preference on evacuation times and flow dynamics.
