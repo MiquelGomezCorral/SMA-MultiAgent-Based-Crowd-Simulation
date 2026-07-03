@@ -110,3 +110,16 @@ Link: Añade aquí el link a tu dataset
 
 
 *Matenido por [MiquelGomezCorral](https://miquelgc.net)*
+
+---
+
+<!-- portfolio-gallery:start -->
+## Gallery
+
+<p align="center">
+  <img src="readme-images/thumbnail_169.webp" width="48%" />
+  <img src="readme-images/agent_shape_color_169.png" width="48%" />
+  <img src="readme-images/deadlock_169.png" width="48%" />
+  <img src="readme-images/graph_ui_169.png" width="48%" />
+</p>
+<!-- portfolio-gallery:end -->

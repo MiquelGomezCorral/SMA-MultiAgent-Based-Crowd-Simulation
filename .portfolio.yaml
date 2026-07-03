@@ -12,21 +12,21 @@ descriptionLong:
     Simulación multi-agente para evacuación de multitudes implementada sobre Mesa (Python agent-based modeling). Define tres tipos de agente con comportamientos distintos: educados (ceden paso, sensibles al hacinamiento), agresivos (empujan, menor sensibilidad al bloqueo) y lentos (velocidad reducida, muy sensibles a la densidad). El entorno es una cuadrícula discreta (OrthogonalMooreGrid) con 6 escenarios: OPEN, MALL, CORRIDOR, SEATS (butacas de teatro), SNAKE (camino serpenteante) y RANDOM. Los agentes usan pathfinding configurable (Manhattan, BFS, A*) para dirigirse a las salidas. Se recolectan métricas detalladas: tasa de evacuación, velocidad macro/micro, densidad local, factor de deadlock, por tipo de agente y globales. Los experimentos masivos (1000 ejecuciones por configuración, 16 procesos en paralelo) analizan 7 dimensiones: densidad de agentes, impacto de agresivos, impacto de lentos, algoritmos de pathfinding, preferencia de salida, número de salidas y anchura de salida. Incluye visualización interactiva con Jupyter widgets y paper en LaTeX.
 technologies: [ai, jupyter, latex, matplot, numpy, pandas, plotly, python]
 tags: [class]
-logo: readme-imaes/thumbnail.webp
+logo: readme-images/thumbnail_169.webp
 screenShoots:
-  - readme-imaes/agent_shape_color.png
-  - readme-imaes/deadlock.png
-  - readme-imaes/graph_ui.png
-  - readme-imaes/heatmap_random.png
-  - readme-imaes/heatmap_seats.png
-  - readme-imaes/scenario_corridor.png
-  - readme-imaes/scenario_mall.png
-  - readme-imaes/scenario_open.png
-  - readme-imaes/scenario_random.png
-  - readme-imaes/scenario_seats.png
-  - readme-imaes/scenario_snake.png
-  - readme-imaes/screenshoot_simulation.png
-  - readme-imaes/thumbnail.webp
+  - readme-images/agent_shape_color_169.png
+  - readme-images/deadlock_169.png
+  - readme-images/graph_ui_169.png
+  - readme-images/heatmap_random_169.png
+  - readme-images/heatmap_seats_169.png
+  - readme-images/scenario_corridor_169.png
+  - readme-images/scenario_mall_169.png
+  - readme-images/scenario_open_169.png
+  - readme-images/scenario_random_169.png
+  - readme-images/scenario_seats_169.png
+  - readme-images/scenario_snake_169.png
+  - readme-images/screenshoot_simulation_169.png
+  - readme-images/thumbnail_169.webp
 youtube: HJeZalWTbt4
 date:
   en: Jan 2026
@@ -37,7 +37,6 @@ keywords:
 slug: SMA-MultiAgent-Based-Crowd-Simulation
 relevancy: 48
 featured: false
-
 
 
 
