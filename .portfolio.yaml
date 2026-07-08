@@ -13,6 +13,7 @@ descriptionLong:
 technologies: [ai, jupyter, latex, matplot, numpy, pandas, plotly, python]
 tags: [class]
 logo: readme-images/thumbnail_169.webp
+gif: readme-images/Evacuation-simulation.gif
 screenShoots:
   - readme-images/agent_shape_color_169.png
   - readme-images/deadlock_169.png
