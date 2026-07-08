@@ -117,9 +117,19 @@ Link: Añade aquí el link a tu dataset
 ## Gallery
 
 <p align="center">
-  <img src="readme-images/Evacuation-simulation.gif" width="48%" />
-  <img src="readme-images/thumbnail_169.webp" width="48%" />
-  <img src="readme-images/agent_shape_color_169.png" width="48%" />
-  <img src="readme-images/deadlock_169.png" width="48%" />
+  <img src="readme-images/Evacuation-simulation.gif" alt="Evacuation simulation" width="48%" />
+  <img src="readme-images/thumbnail_169.webp" alt="thumbnail" width="48%" />
+  <img src="readme-images/agent_shape_color_169.png" alt="agent shape color" width="48%" />
+  <img src="readme-images/deadlock_169.png" alt="deadlock" width="48%" />
+  <img src="readme-images/graph_ui_169.png" alt="graph ui" width="48%" />
+  <img src="readme-images/heatmap_random_169.png" alt="heatmap random" width="48%" />
+  <img src="readme-images/heatmap_seats_169.png" alt="heatmap seats" width="48%" />
+  <img src="readme-images/scenario_corridor_169.png" alt="scenario corridor" width="48%" />
+  <img src="readme-images/scenario_mall_169.png" alt="scenario mall" width="48%" />
+  <img src="readme-images/scenario_open_169.png" alt="scenario open" width="48%" />
+  <img src="readme-images/scenario_random_169.png" alt="scenario random" width="48%" />
+  <img src="readme-images/scenario_seats_169.png" alt="scenario seats" width="48%" />
+  <img src="readme-images/scenario_snake_169.png" alt="scenario snake" width="48%" />
+  <img src="readme-images/screenshoot_simulation_169.png" alt="screenshoot simulation" width="48%" />
 </p>
 <!-- portfolio-gallery:end -->
